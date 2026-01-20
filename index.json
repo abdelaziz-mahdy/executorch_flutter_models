@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-01-10T01:05:01.504706Z",
+  "generated": "2026-01-20T00:20:14.259376Z",
   "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main",
   "models": [
     {
@@ -8,7 +8,7 @@
       "modelName": "mobilenet_v3_small",
       "category": "mobilenet",
       "backend": "coreml",
-      "hash": "48c5d0f41bbec8620d2f5f52f8a67ad5364f7c530feebc348a5fea97444f3e03",
+      "hash": "bd23bdbc3f5192f46c5385207e1ba19572ddb64862ea2dd329c41b6b7ba7b19e",
       "size": 5485668,
       "sizeMB": 5.23,
       "inputSize": 224,
@@ -53,6 +53,9 @@
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
       "platforms": [
         "android",
+        "ios",
+        "macos",
+        "windows",
         "linux"
       ],
       "backendDescription": "GPU-accelerated (Vulkan)"
@@ -82,7 +85,7 @@
       "modelName": "yolo11n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "3dd39cf851d2d86723d61364cdba9983067cb31e826793db94de26785c3fb74d",
+      "hash": "6c6bce4a56bfc5e1501ab640ac95d756fbad398402be840b8bd48d713b44968f",
       "size": 5927184,
       "sizeMB": 5.65,
       "inputSize": 640,
@@ -127,6 +130,9 @@
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
       "platforms": [
         "android",
+        "ios",
+        "macos",
+        "windows",
         "linux"
       ],
       "backendDescription": "GPU-accelerated (Vulkan)"
@@ -156,7 +162,7 @@
       "modelName": "yolov5n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "2d04b544fa7318667dbb5bdfaeba9aee623f366f6a61ce60bd6805b0063da69b",
+      "hash": "f0fd31b0f7f7897d27d2520a2de0e335dcb8e24c8a0e36247ba1b36810e08fa3",
       "size": 5864512,
       "sizeMB": 5.59,
       "inputSize": 640,
@@ -201,6 +207,9 @@
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
       "platforms": [
         "android",
+        "ios",
+        "macos",
+        "windows",
         "linux"
       ],
       "backendDescription": "GPU-accelerated (Vulkan)"
@@ -230,7 +239,7 @@
       "modelName": "yolov8n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "01a09c11b91b619cd736d13eb80a7ea9679b431bafe7c26656ab7b3407d7b543",
+      "hash": "b939a8e6d7e040d6963c22e8c4c5bdff812f00e17d7eaf197c0a3d9234ca2541",
       "size": 6831802,
       "sizeMB": 6.52,
       "inputSize": 640,
@@ -275,6 +284,9 @@
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
       "platforms": [
         "android",
+        "ios",
+        "macos",
+        "windows",
         "linux"
       ],
       "backendDescription": "GPU-accelerated (Vulkan)"
@@ -343,6 +355,9 @@
     "vulkan": {
       "platforms": [
         "android",
+        "ios",
+        "macos",
+        "windows",
         "linux"
       ],
       "description": "GPU-accelerated (Vulkan)"

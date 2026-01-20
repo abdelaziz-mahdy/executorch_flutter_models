@@ -27,7 +27,7 @@ python main.py export --all --backends xnnpack
 | **XNNPACK** | All (including Web) | CPU | General-purpose, universal | Good ⭐⭐⭐ |
 | **Core ML** | iOS, macOS | NPU/GPU/CPU | Apple devices, best performance | Excellent ⭐⭐⭐⭐⭐ |
 | **MPS** | iOS, macOS | GPU | Apple GPU acceleration | Very Good ⭐⭐⭐⭐ |
-| **Vulkan** | Android, Linux | GPU | Android GPU acceleration | Very Good ⭐⭐⭐⭐ |
+| **Vulkan** | Android, iOS, macOS, Windows, Linux | GPU | Cross-platform GPU acceleration | Very Good ⭐⭐⭐⭐ |
 | **QNN** | Android | NPU | Qualcomm SoCs (Snapdragon) | Excellent ⭐⭐⭐⭐⭐ |
 | **ARM** | Embedded | NPU | ARM Ethos-U MCUs | Good ⭐⭐⭐ |
 
@@ -138,18 +138,19 @@ pip install 'coremltools>=9.0'
 - Real-time video processing
 
 ### Vulkan (GPU)
-✅ Works on: Android 7+, Linux, Windows
+✅ Works on: Android 7+, iOS 13+, macOS 11+, Linux, Windows
 ✅ Supported models: Most models
-⚠️ Setup: Vulkan drivers required
+⚠️ Setup: Vulkan drivers required (MoltenVK on Apple platforms)
 ⚠️ Power: Higher power consumption than NPU
 
 **When to use**:
-- Android apps with GPU support
-- Desktop apps with GPU
+- Cross-platform GPU acceleration
+- Android/Desktop apps with GPU support
 - Real-time inference
 
 **Setup on device**:
 - Android: Vulkan drivers included in Android 7+
+- iOS/macOS: Uses MoltenVK (Vulkan over Metal)
 - Linux/Windows: Install GPU drivers with Vulkan support
 
 ### QNN (Qualcomm)
@@ -287,15 +288,13 @@ Future<ExecuTorchModel> loadBestModel() async {
     }
   }
 
-  // Android: Try Vulkan
-  if (Platform.isAndroid) {
-    try {
-      return await ExecuTorchModel.load(
-        await rootBundle.load('assets/models/mobilenet_v3_small_vulkan.pte'),
-      );
-    } catch (e) {
-      print('Vulkan failed, falling back to XNNPACK...');
-    }
+  // Try Vulkan (works on Android, iOS, macOS, Windows, Linux)
+  try {
+    return await ExecuTorchModel.load(
+      await rootBundle.load('assets/models/mobilenet_v3_small_vulkan.pte'),
+    );
+  } catch (e) {
+    print('Vulkan failed, falling back to XNNPACK...');
   }
 
   // CPU fallback (always works)

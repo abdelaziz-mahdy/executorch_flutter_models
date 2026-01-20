@@ -392,7 +392,7 @@ def generate_index_json(output_dir=".."):
         "xnnpack": {"platforms": ["android", "ios", "macos", "web"], "description": "CPU-optimized (XNNPACK)"},
         "coreml": {"platforms": ["ios", "macos"], "description": "Apple Neural Engine (CoreML)"},
         "mps": {"platforms": ["ios", "macos"], "description": "Apple GPU (Metal Performance Shaders)"},
-        "vulkan": {"platforms": ["android", "linux"], "description": "GPU-accelerated (Vulkan)"},
+        "vulkan": {"platforms": ["android", "ios", "macos", "windows", "linux"], "description": "GPU-accelerated (Vulkan)"},
     }
 
     models = []
@@ -631,7 +631,7 @@ Backend Information:
   xnnpack  - CPU-optimized, works on ALL platforms (Android, iOS, macOS, Web)
   coreml   - Apple Neural Engine optimization (iOS, macOS only)
   mps      - Metal Performance Shaders GPU acceleration (iOS, macOS only)
-  vulkan   - Cross-platform GPU acceleration (Android, Linux)
+  vulkan   - Cross-platform GPU acceleration (Android, iOS, macOS, Windows, Linux)
   qnn      - Qualcomm AI Engine (Snapdragon devices)
   arm      - ARM Ethos-U NPU (embedded devices)
 

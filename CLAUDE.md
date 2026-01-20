@@ -96,7 +96,7 @@ Core exporter class that handles:
 | `mobilenet_v3_small_xnnpack.pte` | XNNPACK | All (including web) |
 | `mobilenet_v3_small_coreml.pte` | CoreML | iOS, macOS |
 | `mobilenet_v3_small_mps.pte` | MPS | macOS |
-| `mobilenet_v3_small_vulkan.pte` | Vulkan | Android, Linux |
+| `mobilenet_v3_small_vulkan.pte` | Vulkan | Android, iOS, macOS, Windows, Linux |
 
 ### Object Detection (yolo/)
 
@@ -110,7 +110,7 @@ Each available with backends: `xnnpack`, `coreml`, `mps`, `vulkan`
 | **XNNPACK** | Universal compatibility | All platforms |
 | **CoreML** | Apple Neural Engine | iOS, macOS |
 | **MPS** | Apple GPU | macOS, iOS |
-| **Vulkan** | Android/Linux GPU | Android, Linux |
+| **Vulkan** | Cross-platform GPU | Android, iOS, macOS, Windows, Linux |
 | **QNN** | Qualcomm NPU | Android (Snapdragon) |
 
 ## Adding a New Model
