@@ -73,8 +73,11 @@ jobs:
           fi
 
           if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
-            # All available backends (vulkan not available on Linux CI without GPU)
-            BACKENDS="xnnpack"
+            # Backends available on Linux CI:
+            # - xnnpack: CPU optimized (always works)
+            # - vulkan: GPU via software rendering (works without GPU)
+            # Note: coreml and mps are Apple-only, need macOS runner
+            BACKENDS="xnnpack vulkan"
           fi
 
           echo "models=$MODELS" >> $GITHUB_OUTPUT
