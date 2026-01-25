@@ -1,6 +1,11 @@
 name: Export Models
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'python/**'
   workflow_dispatch:
     inputs:
       models:
@@ -50,30 +55,38 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
 
+      - name: Parse inputs
+        id: parse
+        run: |
+          # Default to 'all' when triggered by push (no inputs)
+          MODELS="${{ github.event.inputs.models }}"
+          BACKENDS="${{ github.event.inputs.backends }}"
+
+          if [ -z "$MODELS" ]; then
+            MODELS="all"
+          fi
+
+          if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
+            # All available backends (vulkan not available on Linux CI without GPU)
+            BACKENDS="xnnpack"
+          fi
+
+          echo "models=$MODELS" >> $GITHUB_OUTPUT
+          echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
+
       - name: Install TensorFlow (for MoveNet)
-        if: github.event.inputs.models == 'movenet' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all'
         run: |
           pip install tensorflow tensorflow_hub tf2onnx
 
-      - name: Parse backends
-        id: parse
-        run: |
-          BACKENDS="${{ github.event.inputs.backends }}"
-          if [ "$BACKENDS" == "all" ]; then
-            # All available backends (vulkan not available on Linux CI without GPU)
-            echo "backends=xnnpack" >> $GITHUB_OUTPUT
-          else
-            echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
-          fi
-
       - name: Export MobileNet
-        if: github.event.inputs.models == 'mobilenet' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO (all variants)
-        if: github.event.inputs.models == 'yolo' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
@@ -81,27 +94,27 @@ jobs:
           python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export BlazeFace
-        if: github.event.inputs.models == 'blazeface' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export MoveNet (all variants)
-        if: github.event.inputs.models == 'movenet' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
           python main.py export --movenet thunder --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO-Pose (all variants)
-        if: github.event.inputs.models == 'yolo-pose' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
           python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO-Face (all variants)
-        if: github.event.inputs.models == 'yolo-face' || github.event.inputs.models == 'all'
+        if: steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all'
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
