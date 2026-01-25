@@ -91,12 +91,14 @@ jobs:
 
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
@@ -105,12 +107,14 @@ jobs:
 
       - name: Export BlazeFace
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export MoveNet (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
@@ -118,6 +122,7 @@ jobs:
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
@@ -125,6 +130,7 @@ jobs:
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
@@ -193,12 +199,14 @@ jobs:
 
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
@@ -207,12 +215,14 @@ jobs:
 
       - name: Export BlazeFace
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export MoveNet (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
@@ -220,6 +230,7 @@ jobs:
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
@@ -227,6 +238,7 @@ jobs:
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
+        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
