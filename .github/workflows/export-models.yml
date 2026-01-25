@@ -48,7 +48,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: python/requirements.txt
+          cache-dependency-path: |
+            python/requirements.txt
+            python/requirements-tensorflow.txt
 
       - name: Install dependencies
         run: |
@@ -77,7 +79,7 @@ jobs:
       - name: Install TensorFlow (for MoveNet)
         if: steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all'
         run: |
-          pip install tensorflow tensorflow_hub tf2onnx
+          pip install -r python/requirements-tensorflow.txt
 
       - name: Export MobileNet
         if: steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all'

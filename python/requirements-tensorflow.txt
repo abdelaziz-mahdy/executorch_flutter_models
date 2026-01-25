@@ -1,0 +1,5 @@
+# TensorFlow dependencies for MoveNet export
+# Kept separate because TensorFlow is large and only needed for MoveNet
+tensorflow>=2.15.0
+tensorflow_hub
+tf2onnx
