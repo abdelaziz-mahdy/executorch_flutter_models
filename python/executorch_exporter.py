@@ -98,17 +98,22 @@ class ExecuTorchExporter:
         """Detect which backends are available in the current environment."""
         available = {}
 
+        # Only detect backends we actually use
+        # Note: QNN and ARM are excluded because:
+        # - QNN auto-downloads a 1.3GB SDK which fills CI disk
+        # - ARM requires specific hardware
+        # - Neither is used in our Flutter plugin targets
         backend_imports = {
             "coreml": "executorch.backends.apple.coreml.partition.CoreMLPartitioner",
             "xnnpack": "executorch.backends.xnnpack.partition.xnnpack_partitioner.XnnpackPartitioner",
             "vulkan": "executorch.backends.vulkan.partitioner.vulkan_partitioner.VulkanPartitioner",
-            "qnn": "executorch.backends.qualcomm.partition.qnn_partitioner.QnnPartitioner",
-            "arm": "executorch.backends.arm.partition.arm_partitioner.ArmPartitioner"
         }
 
         # Portable and MPS are always available if ExecuTorch is installed
         available["portable"] = True
         available["mps"] = True
+        available["qnn"] = False  # Disabled - auto-downloads large SDK
+        available["arm"] = False  # Disabled - requires specific hardware
 
         for backend, import_path in backend_imports.items():
             try:
