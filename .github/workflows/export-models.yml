@@ -38,14 +38,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  export:
+  # Linux job: exports xnnpack and vulkan backends
+  export-linux:
     runs-on: ubuntu-latest
+    if: github.event.inputs.backends == 'all' || github.event.inputs.backends == 'xnnpack' || github.event.inputs.backends == 'vulkan' || github.event.inputs.backends == ''
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -64,7 +64,6 @@ jobs:
       - name: Parse inputs
         id: parse
         run: |
-          # Default to 'all' when triggered by push (no inputs)
           MODELS="${{ github.event.inputs.models }}"
           BACKENDS="${{ github.event.inputs.backends }}"
 
@@ -72,30 +71,32 @@ jobs:
             MODELS="all"
           fi
 
+          # Linux backends: xnnpack and vulkan
           if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
-            # Backends available on Linux CI:
-            # - xnnpack: CPU optimized (always works)
-            # - vulkan: GPU via software rendering (works without GPU)
-            # Note: coreml and mps are Apple-only, need macOS runner
             BACKENDS="xnnpack vulkan"
+          elif [ "$BACKENDS" == "coreml" ] || [ "$BACKENDS" == "mps" ]; then
+            # Skip this job if only Apple backends requested
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
           echo "models=$MODELS" >> $GITHUB_OUTPUT
           echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
 
       - name: Install TensorFlow (for MoveNet)
-        if: steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
         run: |
           pip install -r python/requirements-tensorflow.txt
 
       - name: Export MobileNet
-        if: steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO (all variants)
-        if: steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
@@ -103,31 +104,174 @@ jobs:
           python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export BlazeFace
-        if: steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export MoveNet (all variants)
-        if: steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
           python main.py export --movenet thunder --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO-Pose (all variants)
-        if: steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
           python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
 
       - name: Export YOLO-Face (all variants)
-        if: steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all'
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
           python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Upload Linux artifacts
+        if: steps.parse.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: models-linux
+          path: |
+            **/*.pte
+            !python/**
+          retention-days: 1
+
+  # macOS job: exports coreml and mps backends
+  export-macos:
+    runs-on: macos-latest
+    if: github.event.inputs.backends == 'all' || github.event.inputs.backends == 'coreml' || github.event.inputs.backends == 'mps' || github.event.inputs.backends == ''
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            python/requirements.txt
+            python/requirements-tensorflow.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r python/requirements.txt
+
+      - name: Parse inputs
+        id: parse
+        run: |
+          MODELS="${{ github.event.inputs.models }}"
+          BACKENDS="${{ github.event.inputs.backends }}"
+
+          if [ -z "$MODELS" ]; then
+            MODELS="all"
+          fi
+
+          # macOS backends: coreml and mps
+          if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
+            BACKENDS="coreml mps"
+          elif [ "$BACKENDS" == "xnnpack" ] || [ "$BACKENDS" == "vulkan" ]; then
+            # Skip this job if only Linux backends requested
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "models=$MODELS" >> $GITHUB_OUTPUT
+          echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      - name: Install TensorFlow (for MoveNet)
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
+        run: |
+          pip install -r python/requirements-tensorflow.txt
+
+      - name: Export MobileNet
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO (all variants)
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export BlazeFace
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'blazeface' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export MoveNet (all variants)
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'movenet' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --movenet thunder --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO-Pose (all variants)
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO-Face (all variants)
+        if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
+        working-directory: python
+        run: |
+          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Upload macOS artifacts
+        if: steps.parse.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: models-macos
+          path: |
+            **/*.pte
+            !python/**
+          retention-days: 1
+
+  # Commit job: combines artifacts and commits
+  commit:
+    runs-on: ubuntu-latest
+    needs: [export-linux, export-macos]
+    if: always() && (needs.export-linux.result == 'success' || needs.export-macos.result == 'success')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Linux artifacts
+        if: needs.export-linux.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: models-linux
+          path: .
+
+      - name: Download macOS artifacts
+        if: needs.export-macos.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: models-macos
+          path: .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Update index.json
         working-directory: python
@@ -165,11 +309,15 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "feat: Export models (${{ github.event.inputs.models }}) with backends (${{ github.event.inputs.backends }})"
+            MODELS="${{ github.event.inputs.models }}"
+            BACKENDS="${{ github.event.inputs.backends }}"
+            [ -z "$MODELS" ] && MODELS="all"
+            [ -z "$BACKENDS" ] && BACKENDS="all"
+            git commit -m "feat: Export models ($MODELS) with backends ($BACKENDS)"
             git push
           fi
 
-      - name: Upload artifacts
+      - name: Upload final artifacts
         uses: actions/upload-artifact@v4
         with:
           name: exported-models
