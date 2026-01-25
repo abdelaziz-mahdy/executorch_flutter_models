@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-01-20T00:20:14.259376Z",
+  "generated": "2026-01-25T03:44:08.578432Z",
   "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main",
   "models": [
     {
@@ -15,10 +15,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_coreml.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple Neural Engine (CoreML)"
     },
     {
@@ -33,10 +29,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_mps.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
@@ -51,13 +43,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_vulkan.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "windows",
-        "linux"
-      ],
       "backendDescription": "GPU-accelerated (Vulkan)"
     },
     {
@@ -72,12 +57,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_xnnpack.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "web"
-      ],
       "backendDescription": "CPU-optimized (XNNPACK)"
     },
     {
@@ -92,10 +71,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolo11n_coreml.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple Neural Engine (CoreML)"
     },
     {
@@ -110,10 +85,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolo11n_mps.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
@@ -128,13 +99,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolo11n_vulkan.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "windows",
-        "linux"
-      ],
       "backendDescription": "GPU-accelerated (Vulkan)"
     },
     {
@@ -149,12 +113,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolo11n_xnnpack.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "web"
-      ],
       "backendDescription": "CPU-optimized (XNNPACK)"
     },
     {
@@ -169,10 +127,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov5n_coreml.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple Neural Engine (CoreML)"
     },
     {
@@ -187,10 +141,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov5n_mps.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
@@ -205,13 +155,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov5n_vulkan.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "windows",
-        "linux"
-      ],
       "backendDescription": "GPU-accelerated (Vulkan)"
     },
     {
@@ -226,12 +169,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov5n_xnnpack.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "web"
-      ],
       "backendDescription": "CPU-optimized (XNNPACK)"
     },
     {
@@ -246,10 +183,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov8n_coreml.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple Neural Engine (CoreML)"
     },
     {
@@ -264,10 +197,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov8n_mps.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
@@ -282,13 +211,6 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov8n_vulkan.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "windows",
-        "linux"
-      ],
       "backendDescription": "GPU-accelerated (Vulkan)"
     },
     {
@@ -303,12 +225,30 @@
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/yolov8n_xnnpack.pte",
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "web"
-      ],
+      "backendDescription": "CPU-optimized (XNNPACK)"
+    },
+    {
+      "name": "yolo11n-pose_xnnpack.pte",
+      "modelName": "yolo11n-pose",
+      "category": "yolo-pose",
+      "backend": "xnnpack",
+      "hash": "e8b9e09dceb61fb851cc76c874eb84dbc02f987687162705c44060aec22f6f82",
+      "size": 11701056,
+      "sizeMB": 11.16,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo-pose/yolo11n-pose_xnnpack.pte",
+      "backendDescription": "CPU-optimized (XNNPACK)"
+    },
+    {
+      "name": "yolov11n-face_xnnpack.pte",
+      "modelName": "yolov11n-face",
+      "category": "yolo-face",
+      "backend": "xnnpack",
+      "hash": "7bf783217e8218e15706cc52ff31d90428bc09febbf6d066a6efd6a0294bb824",
+      "size": 10548544,
+      "sizeMB": 10.06,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo-face/yolov11n-face_xnnpack.pte",
       "backendDescription": "CPU-optimized (XNNPACK)"
     }
   ],
@@ -330,36 +270,15 @@
   ],
   "backends": {
     "xnnpack": {
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "web"
-      ],
       "description": "CPU-optimized (XNNPACK)"
     },
     "coreml": {
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "description": "Apple Neural Engine (CoreML)"
     },
     "mps": {
-      "platforms": [
-        "ios",
-        "macos"
-      ],
       "description": "Apple GPU (Metal Performance Shaders)"
     },
     "vulkan": {
-      "platforms": [
-        "android",
-        "ios",
-        "macos",
-        "windows",
-        "linux"
-      ],
       "description": "GPU-accelerated (Vulkan)"
     }
   }

@@ -1,0 +1,157 @@
+name: Export Models
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Models to export'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - blazeface
+          - movenet
+          - yolo-pose
+          - yolo-face
+          - mobilenet
+          - yolo
+      backends:
+        description: 'Backends to use'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - xnnpack
+          - coreml
+          - mps
+          - vulkan
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: python/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r python/requirements.txt
+
+      - name: Install TensorFlow (for MoveNet)
+        if: github.event.inputs.models == 'movenet' || github.event.inputs.models == 'all'
+        run: |
+          pip install tensorflow tensorflow_hub tf2onnx
+
+      - name: Parse backends
+        id: parse
+        run: |
+          BACKENDS="${{ github.event.inputs.backends }}"
+          if [ "$BACKENDS" == "all" ]; then
+            # All available backends (vulkan not available on Linux CI without GPU)
+            echo "backends=xnnpack" >> $GITHUB_OUTPUT
+          else
+            echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Export MobileNet
+        if: github.event.inputs.models == 'mobilenet' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO (all variants)
+        if: github.event.inputs.models == 'yolo' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export BlazeFace
+        if: github.event.inputs.models == 'blazeface' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --blazeface --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export MoveNet (all variants)
+        if: github.event.inputs.models == 'movenet' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --movenet lightning --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --movenet thunder --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO-Pose (all variants)
+        if: github.event.inputs.models == 'yolo-pose' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Export YOLO-Face (all variants)
+        if: github.event.inputs.models == 'yolo-face' || github.event.inputs.models == 'all'
+        working-directory: python
+        run: |
+          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }}
+
+      - name: Update index.json
+        working-directory: python
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          from main import generate_index_json
+          generate_index_json('..')
+          "
+
+      - name: List exported models
+        run: |
+          echo "=== Exported Models ==="
+          find . -name "*.pte" -type f -exec ls -lh {} \;
+          echo ""
+          echo "=== index.json summary ==="
+          python -c "
+          import json
+          with open('index.json') as f:
+              data = json.load(f)
+          print(f'Total models: {len(data[\"models\"])}')
+          for m in data['models']:
+              print(f'  - {m[\"name\"]} ({m[\"sizeMB\"]} MB)')
+          "
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "feat: Export models (${{ github.event.inputs.models }}) with backends (${{ github.event.inputs.backends }})"
+            git push
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-models
+          path: |
+            **/*.pte
+            index.json
+          retention-days: 30

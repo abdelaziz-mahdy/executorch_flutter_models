@@ -344,22 +344,82 @@ def export_blazeface(output_dir="..", backends=None):
 
         try:
             import onnx
+            import tarfile
             from onnx2torch import convert as onnx_to_torch
 
-            # Download BlazeFace ONNX model from ONNX Model Zoo or community
-            # Using the face_detection_front model from MediaPipe via PINTO's conversion
-            onnx_url = "https://github.com/PINTO0309/PINTO_model_zoo/raw/main/030_BlazeFace/saved_model/model_float32.onnx"
+            # Download BlazeFace ONNX model from PINTO's model zoo (hosted on Wasabi S3)
+            # The archive has nested structure: main archive -> 01_float32/resources.tar.gz -> ONNX files
+            tar_url = "https://s3.ap-northeast-2.wasabisys.com/pinto-model-zoo/030_BlazeFace/resources.tar.gz"
 
-            temp_onnx_path = Path(output_dir) / "blazeface" / "blazeface_temp.onnx"
-            temp_onnx_path.parent.mkdir(parents=True, exist_ok=True)
+            blazeface_dir = Path(output_dir) / "blazeface"
+            blazeface_dir.mkdir(parents=True, exist_ok=True)
+            temp_tar_path = blazeface_dir / "blazeface_temp.tar.gz"
+            temp_inner_tar_path = blazeface_dir / "inner_resources.tar.gz"
+            temp_onnx_path = blazeface_dir / "blazeface_temp.onnx"
 
-            print(f"   Downloading BlazeFace ONNX model...")
-            urllib.request.urlretrieve(onnx_url, str(temp_onnx_path))
+            print(f"   Downloading BlazeFace model archive...")
+            urllib.request.urlretrieve(tar_url, str(temp_tar_path))
+
+            # Extract nested tar.gz from main archive
+            print(f"   Extracting inner archive...")
+            with tarfile.open(temp_tar_path, "r:gz") as tar:
+                # Look for the float32 resources_new.tar.gz (contains ONNX files)
+                for member in tar.getmembers():
+                    if "01_float32/resources_new.tar.gz" in member.name:
+                        # Extract inner archive
+                        f = tar.extractfile(member)
+                        if f:
+                            with open(temp_inner_tar_path, 'wb') as out:
+                                out.write(f.read())
+                            break
+
+            # Clean up outer tar file
+            temp_tar_path.unlink()
+
+            if not temp_inner_tar_path.exists():
+                print(f"❌ Could not find float32 resources in archive")
+                return False
+
+            # Extract ONNX from inner archive
+            print(f"   Extracting ONNX model...")
+            with tarfile.open(temp_inner_tar_path, "r:gz") as tar:
+                # Find the 128x128 float32 ONNX model
+                # Filename format: face_detection_front_128x128_float32.onnx
+                for member in tar.getmembers():
+                    if "128x128" in member.name and "float32.onnx" in member.name:
+                        f = tar.extractfile(member)
+                        if f:
+                            with open(temp_onnx_path, 'wb') as out:
+                                out.write(f.read())
+                            print(f"   Found: {member.name}")
+                            break
+                else:
+                    # Fallback: try any float32 onnx file
+                    for member in tar.getmembers():
+                        if member.name.endswith("float32.onnx"):
+                            f = tar.extractfile(member)
+                            if f:
+                                with open(temp_onnx_path, 'wb') as out:
+                                    out.write(f.read())
+                                print(f"   Found (fallback): {member.name}")
+                                break
+
+            # Clean up inner tar file
+            temp_inner_tar_path.unlink()
+
+            if not temp_onnx_path.exists():
+                print(f"❌ Could not find ONNX model in archive")
+                return False
 
             # Load ONNX and convert to PyTorch
             print("   Converting ONNX to PyTorch...")
+            print(f"   DEBUG: ONNX file size: {temp_onnx_path.stat().st_size / 1024:.1f} KB")
             onnx_model = onnx.load(str(temp_onnx_path))
+            print(f"   DEBUG: ONNX loaded, starting onnx2torch conversion...")
+            import sys
+            sys.stdout.flush()
             pt_model = onnx_to_torch(onnx_model).eval()
+            print(f"   DEBUG: PyTorch model ready")
 
             # Clean up temp ONNX file
             temp_onnx_path.unlink()
@@ -557,9 +617,13 @@ def export_yolo_face(model_name="yolov8n-face", output_dir="..", backends=None):
         if not model_path.exists():
             # Try to download from a community source
             # The akanametov/yolo-face repo provides YOLOv8 face models
+            # YapaLab/yolo-face provides YOLO face detection models
             face_model_urls = {
-                "yolov8n-face": "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8n-face.pt",
-                "yolov8s-face": "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8s-face.pt",
+                "yolov11n-face": "https://github.com/YapaLab/yolo-face/releases/download/1.0.0/yolov11n-face.pt",
+                "yolov11s-face": "https://github.com/YapaLab/yolo-face/releases/download/1.0.0/yolov11s-face.pt",
+                "yolov10n-face": "https://github.com/YapaLab/yolo-face/releases/download/1.0.0/yolov10n-face.pt",
+                "yolov10s-face": "https://github.com/YapaLab/yolo-face/releases/download/1.0.0/yolov10s-face.pt",
+                "yolov8l-face": "https://github.com/YapaLab/yolo-face/releases/download/1.0.0/yolov8l-face.pt",
             }
 
             if model_name in face_model_urls:
@@ -864,12 +928,13 @@ def generate_index_json(output_dir=".."):
         },
     }
 
-    # Backend descriptions
+    # Backend descriptions (platforms removed - models are platform-agnostic,
+    # backend availability is determined at runtime by the Flutter plugin)
     backend_info = {
-        "xnnpack": {"platforms": ["android", "ios", "macos", "web"], "description": "CPU-optimized (XNNPACK)"},
-        "coreml": {"platforms": ["ios", "macos"], "description": "Apple Neural Engine (CoreML)"},
-        "mps": {"platforms": ["ios", "macos"], "description": "Apple GPU (Metal Performance Shaders)"},
-        "vulkan": {"platforms": ["android", "ios", "macos", "windows", "linux"], "description": "GPU-accelerated (Vulkan)"},
+        "xnnpack": {"description": "CPU-optimized (XNNPACK)"},
+        "coreml": {"description": "Apple Neural Engine (CoreML)"},
+        "mps": {"description": "Apple GPU (Metal Performance Shaders)"},
+        "vulkan": {"description": "GPU-accelerated (Vulkan)"},
     }
 
     models = []
@@ -916,9 +981,8 @@ def generate_index_json(output_dir=".."):
                 model_entry["labelsFile"] = config["labelsFile"]
                 model_entry["labelsRemoteUrl"] = config["labelsUrl"]
 
-            # Add backend info if available
+            # Add backend description if available
             if backend in backend_info:
-                model_entry["platforms"] = backend_info[backend]["platforms"]
                 model_entry["backendDescription"] = backend_info[backend]["description"]
 
             models.append(model_entry)

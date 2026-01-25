@@ -9,24 +9,33 @@
 #
 # Install with: pip install -r requirements.txt
 
-# Core ExecuTorch package (includes PyTorch dependencies)
-# This package includes export capabilities and Python runtime bindings
-executorch
+# Core packages with tested compatible versions
+executorch==1.0.1       # ExecuTorch export library
+torch>=2.9.0            # PyTorch (2.9.x compatible with ExecuTorch 1.0.1)
+torchvision>=0.24.0     # For pretrained models (MobileNet, etc.)
 
-# Backend-specific dependencies
-# CoreML backend (macOS/iOS only) - included in executorch on macOS
-# XNNPACK backend - included in executorch
-# MPS backend (macOS/iOS only) - included in executorch on macOS
+# YOLO models
+ultralytics>=8.3.0      # For YOLO object detection, pose, and face models
 
-# For additional backend support, you may need:
-# coremltools>=7.0  # For advanced CoreML features (macOS only)
+# ONNX conversion (required for BlazeFace and MoveNet)
+onnx>=1.20.0            # ONNX model format
+onnx2torch>=1.5.0       # ONNX to PyTorch conversion
 
-# Utilities for model handling and examples
-torchvision  # For pretrained models and vision utilities
-numpy        # For tensor operations
-pillow       # For image processing examples
+# Optional: TensorFlow dependencies (required for MoveNet export)
+# Note: TensorFlow can have compatibility issues on some systems
+# Uncomment if you need to export MoveNet models:
+# tensorflow>=2.15.0
+# tensorflow_hub
+# tf2onnx
+
+# Optional: Apple backend support (macOS/iOS)
+# coremltools>=9.0      # For CoreML backend
+
+# Utilities
+numpy                   # For tensor operations
+pillow                  # For image processing
 
 # Development and testing (optional)
-# pytest      # For testing export scripts
-# black       # Code formatting
-# isort       # Import sorting
+# pytest
+# black
+# isort
