@@ -418,8 +418,24 @@ def export_blazeface(output_dir="..", backends=None):
             print(f"   DEBUG: ONNX loaded, starting onnx2torch conversion...")
             import sys
             sys.stdout.flush()
-            pt_model = onnx_to_torch(onnx_model).eval()
-            print(f"   DEBUG: PyTorch model ready")
+
+            # The BlazeFace model from MediaPipe is in NHWC format (TensorFlow)
+            # We need to wrap it to handle NCHW input (PyTorch standard)
+            raw_model = onnx_to_torch(onnx_model).eval()
+
+            # Create wrapper that converts NCHW -> NHWC for input
+            class BlazeFaceWrapper(torch.nn.Module):
+                def __init__(self, model):
+                    super().__init__()
+                    self.model = model
+
+                def forward(self, x):
+                    # Input x is NCHW [B, C, H, W], convert to NHWC [B, H, W, C]
+                    x_nhwc = x.permute(0, 2, 3, 1)
+                    return self.model(x_nhwc)
+
+            pt_model = BlazeFaceWrapper(raw_model).eval()
+            print(f"   DEBUG: PyTorch model ready (with NCHW wrapper)")
 
             # Clean up temp ONNX file
             temp_onnx_path.unlink()
