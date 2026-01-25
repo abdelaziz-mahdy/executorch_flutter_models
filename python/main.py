@@ -183,6 +183,463 @@ def export_yolo(model_name="yolo11n", output_dir="..", backends=None):
         return False
 
 
+def export_movenet(model_variant="lightning", output_dir="..", backends=None):
+    """Export MoveNet pose estimation model.
+
+    MoveNet is a pose estimation model from TensorFlow Hub.
+    Supports 'lightning' (faster, 192x192) and 'thunder' (more accurate, 256x256).
+
+    Flow: TensorFlow Hub → ONNX → PyTorch → ExecuTorch
+    """
+    print("\n" + "="*70)
+    print(f"  Exporting MoveNet {model_variant.upper()}")
+    print("="*70 + "\n")
+
+    try:
+        import torch
+        import numpy as np
+        from pathlib import Path
+        from executorch_exporter import ExecuTorchExporter, ExportConfig
+
+        # Validate variant
+        if model_variant not in ["lightning", "thunder"]:
+            print(f"❌ Invalid variant: {model_variant}. Use 'lightning' or 'thunder'")
+            return False
+
+        # Input size depends on variant
+        input_size = 192 if model_variant == "lightning" else 256
+
+        print(f"📦 Loading MoveNet {model_variant} (input size: {input_size}x{input_size})...")
+
+        # Default backends
+        if backends is None:
+            backends = ['xnnpack', 'coreml', 'mps', 'vulkan']
+
+        # Try to load from TensorFlow Hub and convert to ONNX, then to PyTorch
+        try:
+            import tensorflow as tf
+            import tensorflow_hub as hub
+            import tf2onnx
+            import onnx
+            from onnx2torch import convert as onnx_to_torch
+
+            # Load from TensorFlow Hub
+            model_url = f"https://tfhub.dev/google/movenet/singlepose/{model_variant}/4"
+            print(f"   Loading from TensorFlow Hub: {model_url}")
+
+            # Create a concrete function from the TF Hub model
+            module = hub.load(model_url)
+            model_fn = module.signatures['serving_default']
+
+            # Create input spec for tf2onnx
+            input_spec = tf.TensorSpec([1, input_size, input_size, 3], tf.int32, name='input')
+
+            # Convert to ONNX
+            print("   Converting to ONNX...")
+            temp_onnx_path = Path(output_dir) / "movenet" / f"movenet_{model_variant}_temp.onnx"
+            temp_onnx_path.parent.mkdir(parents=True, exist_ok=True)
+
+            model_proto, _ = tf2onnx.convert.from_function(
+                model_fn,
+                input_signature=[input_spec],
+                opset=13,
+                output_path=str(temp_onnx_path)
+            )
+
+            # Load ONNX and convert to PyTorch
+            print("   Converting ONNX to PyTorch...")
+            onnx_model = onnx.load(str(temp_onnx_path))
+            pt_model = onnx_to_torch(onnx_model).eval()
+
+            # Clean up temp ONNX file
+            temp_onnx_path.unlink()
+
+        except ImportError as e:
+            print(f"❌ Missing dependencies for TensorFlow conversion: {e}")
+            print(f"\n💡 Install required packages:")
+            print(f"   pip install tensorflow tensorflow_hub tf2onnx onnx onnx2torch")
+            return False
+
+        # Create exporter
+        exporter = ExecuTorchExporter()
+
+        # Filter backends to only available ones
+        available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+
+        if not available_backends:
+            print(f"⚠️  No available backends from requested: {backends}")
+            print(f"   Available backends: {[k for k, v in exporter.available_backends.items() if v]}")
+            return False
+
+        print(f"📦 Exporting to backends: {available_backends}")
+
+        # Prepare sample inputs (NCHW format for PyTorch)
+        sample_inputs = (torch.randn(1, 3, input_size, input_size),)
+
+        # Output to movenet subdirectory
+        movenet_output_dir = str(Path(output_dir) / "movenet")
+
+        # Create export config
+        config = ExportConfig(
+            model_name=f'movenet_{model_variant}',
+            backends=available_backends,
+            output_dir=movenet_output_dir,
+            quantize=False,
+            input_shapes=[[1, 3, input_size, input_size]],
+            input_dtypes=['float32']
+        )
+
+        # Export to all backends
+        results = exporter.export_model(pt_model, sample_inputs, config)
+
+        # Check success
+        successful = [r for r in results if r.success]
+        failed = [r for r in results if not r.success]
+
+        if successful:
+            print(f"\n✅ Successfully exported {len(successful)}/{len(results)} backends")
+            for result in successful:
+                print(f"   • {result.backend}: {result.output_path.split('/')[-1]} ({result.file_size_mb:.1f} MB)")
+
+        if failed:
+            print(f"\n⚠️  Failed {len(failed)} backend(s):")
+            for result in failed:
+                print(f"   • {result.backend}: {result.error_message}")
+
+        return len(successful) > 0
+
+    except Exception as e:
+        print(f"❌ Export failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def export_blazeface(output_dir="..", backends=None):
+    """Export BlazeFace face detection model.
+
+    BlazeFace is a lightweight face detection model from MediaPipe.
+    Uses ONNX model from community sources.
+
+    Flow: ONNX → PyTorch → ExecuTorch
+    Input size: 128x128
+    """
+    print("\n" + "="*70)
+    print("  Exporting BlazeFace")
+    print("="*70 + "\n")
+
+    try:
+        import torch
+        import urllib.request
+        from pathlib import Path
+        from executorch_exporter import ExecuTorchExporter, ExportConfig
+
+        # Default backends
+        if backends is None:
+            backends = ['xnnpack', 'coreml', 'mps', 'vulkan']
+
+        input_size = 128
+
+        print(f"📦 Loading BlazeFace (input size: {input_size}x{input_size})...")
+
+        try:
+            import onnx
+            from onnx2torch import convert as onnx_to_torch
+
+            # Download BlazeFace ONNX model from ONNX Model Zoo or community
+            # Using the face_detection_front model from MediaPipe via PINTO's conversion
+            onnx_url = "https://github.com/PINTO0309/PINTO_model_zoo/raw/main/030_BlazeFace/saved_model/model_float32.onnx"
+
+            temp_onnx_path = Path(output_dir) / "blazeface" / "blazeface_temp.onnx"
+            temp_onnx_path.parent.mkdir(parents=True, exist_ok=True)
+
+            print(f"   Downloading BlazeFace ONNX model...")
+            urllib.request.urlretrieve(onnx_url, str(temp_onnx_path))
+
+            # Load ONNX and convert to PyTorch
+            print("   Converting ONNX to PyTorch...")
+            onnx_model = onnx.load(str(temp_onnx_path))
+            pt_model = onnx_to_torch(onnx_model).eval()
+
+            # Clean up temp ONNX file
+            temp_onnx_path.unlink()
+
+        except ImportError as e:
+            print(f"❌ Missing dependencies for ONNX conversion: {e}")
+            print(f"\n💡 Install required packages:")
+            print(f"   pip install onnx onnx2torch")
+            return False
+        except urllib.error.URLError as e:
+            print(f"❌ Failed to download BlazeFace model: {e}")
+            return False
+
+        # Create exporter
+        exporter = ExecuTorchExporter()
+
+        # Filter backends to only available ones
+        available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+
+        if not available_backends:
+            print(f"⚠️  No available backends from requested: {backends}")
+            print(f"   Available backends: {[k for k, v in exporter.available_backends.items() if v]}")
+            return False
+
+        print(f"📦 Exporting to backends: {available_backends}")
+
+        # Prepare sample inputs (NCHW format)
+        sample_inputs = (torch.randn(1, 3, input_size, input_size),)
+
+        # Output to blazeface subdirectory
+        blazeface_output_dir = str(Path(output_dir) / "blazeface")
+
+        # Create export config
+        config = ExportConfig(
+            model_name='blazeface',
+            backends=available_backends,
+            output_dir=blazeface_output_dir,
+            quantize=False,
+            input_shapes=[[1, 3, input_size, input_size]],
+            input_dtypes=['float32']
+        )
+
+        # Export to all backends
+        results = exporter.export_model(pt_model, sample_inputs, config)
+
+        # Check success
+        successful = [r for r in results if r.success]
+        failed = [r for r in results if not r.success]
+
+        if successful:
+            print(f"\n✅ Successfully exported {len(successful)}/{len(results)} backends")
+            for result in successful:
+                print(f"   • {result.backend}: {result.output_path.split('/')[-1]} ({result.file_size_mb:.1f} MB)")
+
+        if failed:
+            print(f"\n⚠️  Failed {len(failed)} backend(s):")
+            for result in failed:
+                print(f"   • {result.backend}: {result.error_message}")
+
+        return len(successful) > 0
+
+    except Exception as e:
+        print(f"❌ Export failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def export_yolo_pose(model_name="yolo11n-pose", output_dir="..", backends=None):
+    """Export YOLO Pose estimation model.
+
+    Uses Ultralytics YOLO pose models for human pose estimation.
+    Input size: 640x640
+
+    Supported models: yolo11n-pose, yolo11s-pose, yolov8n-pose, yolov8s-pose
+    """
+    print("\n" + "="*70)
+    print(f"  Exporting {model_name.upper()}")
+    print("="*70 + "\n")
+
+    try:
+        import torch
+        import numpy as np
+        from pathlib import Path
+        from ultralytics import YOLO
+        from executorch_exporter import ExecuTorchExporter, ExportConfig
+
+        # Default backends
+        if backends is None:
+            backends = ['xnnpack', 'coreml', 'mps', 'vulkan']
+
+        # Load YOLO Pose model
+        print(f"📦 Loading {model_name}...")
+        model = YOLO(f"{model_name}.pt")
+
+        # Run a dummy prediction to initialize the model
+        np_dummy_tensor = np.ones((640, 640, 3))
+        model.predict(np_dummy_tensor, imgsz=(640, 640), device="cpu")
+
+        # Get the PyTorch model and put in eval mode
+        pt_model = model.model.cpu().eval()
+
+        # Prepare sample inputs (640x640 for YOLO)
+        sample_inputs = (torch.randn(1, 3, 640, 640),)
+
+        # Create exporter
+        exporter = ExecuTorchExporter()
+
+        # Filter backends to only available ones
+        available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+
+        if not available_backends:
+            print(f"⚠️  No available backends from requested: {backends}")
+            print(f"   Available backends: {[k for k, v in exporter.available_backends.items() if v]}")
+            return False
+
+        print(f"📦 Exporting to backends: {available_backends}")
+
+        # Output to yolo-pose subdirectory
+        yolo_pose_output_dir = str(Path(output_dir) / "yolo-pose")
+
+        # Create export config
+        config = ExportConfig(
+            model_name=model_name,
+            backends=available_backends,
+            output_dir=yolo_pose_output_dir,
+            quantize=False,
+            input_shapes=[[1, 3, 640, 640]],
+            input_dtypes=['float32']
+        )
+
+        # Export to all backends
+        results = exporter.export_model(pt_model, sample_inputs, config)
+
+        # Check success
+        successful = [r for r in results if r.success]
+        failed = [r for r in results if not r.success]
+
+        if successful:
+            print(f"\n✅ Successfully exported {len(successful)}/{len(results)} backends")
+            for result in successful:
+                print(f"   • {result.backend}: {result.output_path.split('/')[-1]} ({result.file_size_mb:.1f} MB)")
+
+        if failed:
+            print(f"\n⚠️  Failed {len(failed)} backend(s):")
+            for result in failed:
+                print(f"   • {result.backend}: {result.error_message}")
+
+        # Clean up downloaded model files
+        for pt_file in Path.cwd().glob("*.pt"):
+            if pt_file.stem.startswith(model_name.split("-")[0]):
+                pt_file.unlink()
+                print(f"   Cleaned up: {pt_file.name}")
+
+        return len(successful) > 0
+
+    except Exception as e:
+        print(f"❌ Export failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def export_yolo_face(model_name="yolov8n-face", output_dir="..", backends=None):
+    """Export YOLO Face detection model.
+
+    Uses Ultralytics YOLO face models for face detection.
+    Input size: 640x640
+
+    Supported models: yolov8n-face, yolov8s-face
+    Note: YOLO Face models may require downloading from community repos.
+    """
+    print("\n" + "="*70)
+    print(f"  Exporting {model_name.upper()}")
+    print("="*70 + "\n")
+
+    try:
+        import torch
+        import numpy as np
+        import urllib.request
+        from pathlib import Path
+        from ultralytics import YOLO
+        from executorch_exporter import ExecuTorchExporter, ExportConfig
+
+        # Default backends
+        if backends is None:
+            backends = ['xnnpack', 'coreml', 'mps', 'vulkan']
+
+        print(f"📦 Loading {model_name}...")
+
+        # YOLO Face models need to be downloaded from community repos
+        # Using deepcam-cn/yolov5-face adapted for ultralytics
+        model_path = Path.cwd() / f"{model_name}.pt"
+
+        if not model_path.exists():
+            # Try to download from a community source
+            # The akanametov/yolo-face repo provides YOLOv8 face models
+            face_model_urls = {
+                "yolov8n-face": "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8n-face.pt",
+                "yolov8s-face": "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8s-face.pt",
+            }
+
+            if model_name in face_model_urls:
+                print(f"   Downloading {model_name} from community repo...")
+                urllib.request.urlretrieve(face_model_urls[model_name], str(model_path))
+            else:
+                print(f"❌ Unknown face model: {model_name}")
+                print(f"   Supported models: {list(face_model_urls.keys())}")
+                return False
+
+        # Load YOLO Face model
+        model = YOLO(str(model_path))
+
+        # Run a dummy prediction to initialize the model
+        np_dummy_tensor = np.ones((640, 640, 3))
+        model.predict(np_dummy_tensor, imgsz=(640, 640), device="cpu")
+
+        # Get the PyTorch model and put in eval mode
+        pt_model = model.model.cpu().eval()
+
+        # Prepare sample inputs (640x640 for YOLO)
+        sample_inputs = (torch.randn(1, 3, 640, 640),)
+
+        # Create exporter
+        exporter = ExecuTorchExporter()
+
+        # Filter backends to only available ones
+        available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+
+        if not available_backends:
+            print(f"⚠️  No available backends from requested: {backends}")
+            print(f"   Available backends: {[k for k, v in exporter.available_backends.items() if v]}")
+            return False
+
+        print(f"📦 Exporting to backends: {available_backends}")
+
+        # Output to yolo-face subdirectory
+        yolo_face_output_dir = str(Path(output_dir) / "yolo-face")
+
+        # Create export config
+        config = ExportConfig(
+            model_name=model_name,
+            backends=available_backends,
+            output_dir=yolo_face_output_dir,
+            quantize=False,
+            input_shapes=[[1, 3, 640, 640]],
+            input_dtypes=['float32']
+        )
+
+        # Export to all backends
+        results = exporter.export_model(pt_model, sample_inputs, config)
+
+        # Check success
+        successful = [r for r in results if r.success]
+        failed = [r for r in results if not r.success]
+
+        if successful:
+            print(f"\n✅ Successfully exported {len(successful)}/{len(results)} backends")
+            for result in successful:
+                print(f"   • {result.backend}: {result.output_path.split('/')[-1]} ({result.file_size_mb:.1f} MB)")
+
+        if failed:
+            print(f"\n⚠️  Failed {len(failed)} backend(s):")
+            for result in failed:
+                print(f"   • {result.backend}: {result.error_message}")
+
+        # Clean up downloaded model files
+        if model_path.exists():
+            model_path.unlink()
+            print(f"   Cleaned up: {model_path.name}")
+
+        return len(successful) > 0
+
+    except Exception as e:
+        print(f"❌ Export failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def export_gemma(model_name="gemma-3-270m", output_dir=".."):
     """Export Gemma text generation model using Optimum ExecuTorch.
 
@@ -385,6 +842,26 @@ def generate_index_json(output_dir=".."):
             "labelsFile": None,
             "labelsUrl": None,
         },
+        "movenet": {
+            "inputSize": 192,  # Default for lightning; thunder uses 256
+            "labelsFile": None,
+            "labelsUrl": None,
+        },
+        "blazeface": {
+            "inputSize": 128,
+            "labelsFile": None,
+            "labelsUrl": None,
+        },
+        "yolo-pose": {
+            "inputSize": 640,
+            "labelsFile": None,
+            "labelsUrl": None,
+        },
+        "yolo-face": {
+            "inputSize": 640,
+            "labelsFile": None,
+            "labelsUrl": None,
+        },
     }
 
     # Backend descriptions
@@ -511,14 +988,28 @@ def cmd_export(args):
     # Determine what to export
     export_mobilenet_flag = args.all or args.mobilenet
     export_yolo_models = []
-    # Note: Gemma is NOT included in --all because it requires HuggingFace authentication
-    # Users must explicitly use --gemma flag
+    export_yolo_pose_models = []
+    export_yolo_face_models = []
+    # Note: Gemma, MoveNet, BlazeFace are NOT included in --all because they require
+    # additional dependencies. Users must explicitly use their respective flags.
     export_gemma_flag = args.gemma
+    export_movenet_variant = getattr(args, 'movenet', None)
+    export_blazeface_flag = getattr(args, 'blazeface', False)
 
     if args.all:
         export_yolo_models = ["yolo11n", "yolov8n", "yolov5n"]  # All nano YOLO models
     if args.yolo:
         export_yolo_models.extend(args.yolo)
+
+    # Handle yolo-pose argument (uses underscore in attribute name due to argparse)
+    yolo_pose_arg = getattr(args, 'yolo_pose', None)
+    if yolo_pose_arg:
+        export_yolo_pose_models.extend(yolo_pose_arg)
+
+    # Handle yolo-face argument
+    yolo_face_arg = getattr(args, 'yolo_face', None)
+    if yolo_face_arg:
+        export_yolo_face_models.extend(yolo_face_arg)
 
     # Export MobileNet
     if export_mobilenet_flag:
@@ -526,10 +1017,34 @@ def cmd_export(args):
         if export_mobilenet(args.output_dir, backends):
             success_count += 1
 
-    # Export YOLO models
+    # Export YOLO object detection models
     for model_name in export_yolo_models:
         total_count += 1
         if export_yolo(model_name, args.output_dir, backends):
+            success_count += 1
+
+    # Export YOLO Pose models
+    for model_name in export_yolo_pose_models:
+        total_count += 1
+        if export_yolo_pose(model_name, args.output_dir, backends):
+            success_count += 1
+
+    # Export YOLO Face models
+    for model_name in export_yolo_face_models:
+        total_count += 1
+        if export_yolo_face(model_name, args.output_dir, backends):
+            success_count += 1
+
+    # Export MoveNet
+    if export_movenet_variant:
+        total_count += 1
+        if export_movenet(export_movenet_variant, args.output_dir, backends):
+            success_count += 1
+
+    # Export BlazeFace
+    if export_blazeface_flag:
+        total_count += 1
+        if export_blazeface(args.output_dir, backends):
             success_count += 1
 
     # Export Gemma
@@ -618,10 +1133,23 @@ Examples:
   python main.py export --yolo yolo11n              # Export YOLO11n with all backends
   python main.py export --all --backends xnnpack    # Export all models with XNNPACK only
   python main.py export --gemma                     # Export Gemma text generation model
+  python main.py export --movenet lightning         # Export MoveNet Lightning (pose estimation)
+  python main.py export --blazeface                 # Export BlazeFace (face detection)
+  python main.py export --yolo-pose yolo11n-pose    # Export YOLO Pose model
+  python main.py export --yolo-face yolov8n-face    # Export YOLO Face model
   python main.py validate                           # Validate all models
 
-Supported YOLO models:
+Supported YOLO Object Detection models:
   yolo11n, yolo11s, yolov8n, yolov8s, yolov5n, yolov5s
+
+Supported YOLO Pose models:
+  yolo11n-pose, yolo11s-pose, yolov8n-pose, yolov8s-pose
+
+Supported YOLO Face models:
+  yolov8n-face, yolov8s-face
+
+Supported MoveNet models:
+  lightning (192x192, faster), thunder (256x256, more accurate)
 
 Supported Text Generation models:
   gemma-3-270m (Google Gemma 3, 270M parameters, text-only, ~240 MB)
@@ -645,6 +1173,12 @@ Performance Guidelines:
   - Qualcomm devices: Use QNN for NPU acceleration
   - All platforms (including Web): XNNPACK works everywhere with good performance
 
+Note: MoveNet requires additional packages:
+  pip install tensorflow tensorflow_hub tf2onnx onnx onnx2torch
+
+Note: BlazeFace requires additional packages:
+  pip install onnx onnx2torch
+
 Note: Gemma models require additional setup (advanced):
   1. Install optimum-executorch from source:
      git clone https://github.com/huggingface/optimum-executorch.git
@@ -663,6 +1197,13 @@ Note: Gemma models require additional setup (advanced):
     export_parser.add_argument('--mobilenet', action='store_true', help='Export MobileNet')
     export_parser.add_argument('--yolo', nargs='+', metavar='MODEL', help='Export YOLO model(s)')
     export_parser.add_argument('--gemma', action='store_true', help='Export Gemma text generation model')
+    export_parser.add_argument('--movenet', nargs='?', const='lightning', metavar='VARIANT',
+                                help='Export MoveNet pose estimation (lightning or thunder, default: lightning)')
+    export_parser.add_argument('--blazeface', action='store_true', help='Export BlazeFace face detection')
+    export_parser.add_argument('--yolo-pose', nargs='+', metavar='MODEL',
+                                help='Export YOLO Pose model(s) (e.g., yolo11n-pose, yolov8n-pose)')
+    export_parser.add_argument('--yolo-face', nargs='+', metavar='MODEL',
+                                help='Export YOLO Face model(s) (e.g., yolov8n-face, yolov8s-face)')
     export_parser.add_argument('--labels', action='store_true', help='Generate label files')
     export_parser.add_argument('--backends', nargs='+',
                                 choices=['xnnpack', 'coreml', 'mps', 'vulkan', 'qnn', 'arm'],
@@ -688,8 +1229,13 @@ Note: Gemma models require additional setup (advanced):
         args.mobilenet = False
         args.yolo = None
         args.gemma = False
+        args.movenet = None
+        args.blazeface = False
+        args.yolo_pose = None
+        args.yolo_face = None
         args.labels = True
         args.output_dir = '..'
+        args.backends = None
 
     # Run command
     if args.command == 'export':
