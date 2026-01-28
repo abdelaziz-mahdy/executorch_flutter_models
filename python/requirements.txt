@@ -9,10 +9,10 @@
 #
 # Install with: pip install -r requirements.txt
 
-# Core packages with tested compatible versions
-executorch==1.0.1       # ExecuTorch export library
-torch>=2.9.0            # PyTorch (2.9.x compatible with ExecuTorch 1.0.1)
-torchvision>=0.24.0     # For pretrained models (MobileNet, etc.)
+# Core packages
+# Note: executorch is installed by CI workflow with specific version
+# torch version is pulled automatically by executorch dependency
+torchvision             # For pretrained models (MobileNet, etc.)
 
 # YOLO models
 ultralytics>=8.3.0      # For YOLO object detection, pose, and face models
