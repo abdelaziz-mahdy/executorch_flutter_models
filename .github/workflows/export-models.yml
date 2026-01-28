@@ -8,6 +8,14 @@ on:
       - 'python/**'
   workflow_dispatch:
     inputs:
+      executorch_version:
+        description: 'ExecuTorch version to export'
+        required: true
+        default: '1.1.0'
+        type: choice
+        options:
+          - '1.0.1'
+          - '1.1.0'
       models:
         description: 'Models to export'
         required: true
@@ -32,8 +40,11 @@ on:
           - vulkan
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.executorch_version || '1.1.0' }}
   cancel-in-progress: true
+
+env:
+  EXECUTORCH_VERSION: ${{ github.event.inputs.executorch_version || '1.1.0' }}
 
 jobs:
   # Linux job: exports xnnpack and vulkan backends
@@ -42,6 +53,17 @@ jobs:
     if: github.event.inputs.backends == 'all' || github.event.inputs.backends == 'xnnpack' || github.event.inputs.backends == 'vulkan' || github.event.inputs.backends == ''
 
     steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,6 +78,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
+          pip install executorch==${{ env.EXECUTORCH_VERSION }}
 
       - name: Parse inputs
         id: parse
@@ -79,46 +102,53 @@ jobs:
           echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
           echo "skip=false" >> $GITHUB_OUTPUT
 
+      - name: Create version directory
+        if: steps.parse.outputs.skip != 'true'
+        run: |
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/mobilenet
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-pose
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-face
+
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Upload Linux artifacts
         if: steps.parse.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: models-linux
+          name: models-linux-${{ env.EXECUTORCH_VERSION }}
           path: |
-            **/*.pte
-            !python/**
+            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
           retention-days: 1
 
   # macOS job: exports coreml and mps backends
@@ -141,6 +171,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
+          pip install executorch==${{ env.EXECUTORCH_VERSION }}
 
       - name: Parse inputs
         id: parse
@@ -164,46 +195,53 @@ jobs:
           echo "backends=$BACKENDS" >> $GITHUB_OUTPUT
           echo "skip=false" >> $GITHUB_OUTPUT
 
+      - name: Create version directory
+        if: steps.parse.outputs.skip != 'true'
+        run: |
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/mobilenet
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-pose
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-face
+
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo yolov8n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo yolov5n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo-pose yolov8n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
         continue-on-error: true
         working-directory: python
         run: |
-          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }}
-          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }}
+          python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
+          python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
       - name: Upload macOS artifacts
         if: steps.parse.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: models-macos
+          name: models-macos-${{ env.EXECUTORCH_VERSION }}
           path: |
-            **/*.pte
-            !python/**
+            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
           retention-days: 1
 
   # Commit job: combines artifacts and commits
@@ -222,14 +260,14 @@ jobs:
         if: needs.export-linux.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          name: models-linux
+          name: models-linux-${{ env.EXECUTORCH_VERSION }}
           path: .
 
       - name: Download macOS artifacts
         if: needs.export-macos.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          name: models-macos
+          name: models-macos-${{ env.EXECUTORCH_VERSION }}
           path: .
 
       - name: Set up Python
@@ -244,29 +282,64 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
 
-      - name: Update index.json
+      - name: Copy labels to version directory
+        run: |
+          # Copy labels from 1.0.1 if they exist (they're the same for all versions)
+          if [ -d "1.0.1/mobilenet" ] && [ -f "1.0.1/mobilenet/labels.txt" ]; then
+            cp 1.0.1/mobilenet/labels.txt ${{ env.EXECUTORCH_VERSION }}/mobilenet/ 2>/dev/null || true
+          fi
+          if [ -d "1.0.1/yolo" ] && [ -f "1.0.1/yolo/labels.txt" ]; then
+            cp 1.0.1/yolo/labels.txt ${{ env.EXECUTORCH_VERSION }}/yolo/ 2>/dev/null || true
+          fi
+
+      - name: Update index.json for version
         working-directory: python
         run: |
           python -c "
           import sys
           sys.path.insert(0, '.')
           from main import generate_index_json
-          generate_index_json('..')
+          version = '${{ env.EXECUTORCH_VERSION }}'
+          generate_index_json(f'../{version}', version=version)
           "
 
       - name: List exported models
         run: |
-          echo "=== Exported Models ==="
-          find . -name "*.pte" -type f -exec ls -lh {} \;
+          echo "=== Exported Models for version ${{ env.EXECUTORCH_VERSION }} ==="
+          find ${{ env.EXECUTORCH_VERSION }} -name "*.pte" -type f -exec ls -lh {} \;
           echo ""
           echo "=== index.json summary ==="
           python -c "
           import json
-          with open('index.json') as f:
+          version = '${{ env.EXECUTORCH_VERSION }}'
+          with open(f'{version}/index.json') as f:
               data = json.load(f)
           print(f'Total models: {len(data[\"models\"])}')
           for m in data['models']:
               print(f'  - {m[\"name\"]} ({m[\"sizeMB\"]} MB)')
+          "
+
+      - name: Update versions.json
+        run: |
+          python -c "
+          import json
+          version = '${{ env.EXECUTORCH_VERSION }}'
+
+          # Read current versions.json
+          with open('versions.json', 'r') as f:
+              data = json.load(f)
+
+          # Add version if not present
+          if version not in data['versions']:
+              data['versions'].append(version)
+              data['versions'].sort()
+
+          # Update latest
+          data['latest'] = version
+
+          # Write back
+          with open('versions.json', 'w') as f:
+              json.dump(data, f, indent=2)
           "
 
       - name: Commit and push
@@ -282,17 +355,18 @@ jobs:
           else
             MODELS="${{ github.event.inputs.models }}"
             BACKENDS="${{ github.event.inputs.backends }}"
+            VERSION="${{ env.EXECUTORCH_VERSION }}"
             [ -z "$MODELS" ] && MODELS="all"
             [ -z "$BACKENDS" ] && BACKENDS="all"
-            git commit -m "feat: Export models ($MODELS) with backends ($BACKENDS)"
+            git commit -m "feat: Export models ($MODELS) with backends ($BACKENDS) for ExecuTorch $VERSION"
             git push
           fi
 
       - name: Upload final artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: exported-models
+          name: exported-models-${{ env.EXECUTORCH_VERSION }}
           path: |
-            **/*.pte
-            index.json
+            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
+            ${{ env.EXECUTORCH_VERSION }}/index.json
           retention-days: 30

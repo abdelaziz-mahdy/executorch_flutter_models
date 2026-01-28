@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "generated": null,
+  "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.1.0",
+  "models": [],
+  "labels": [],
+  "backends": {
+    "xnnpack": {
+      "description": "CPU-optimized (XNNPACK)"
+    },
+    "coreml": {
+      "description": "Apple Neural Engine (CoreML)"
+    },
+    "mps": {
+      "description": "Apple GPU (Metal Performance Shaders)"
+    },
+    "vulkan": {
+      "description": "GPU-accelerated (Vulkan)"
+    }
+  }
+}

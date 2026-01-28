@@ -884,7 +884,7 @@ def export_labels(output_dir=".."):
     print(f"📁 MobileNet labels should be at: {mobilenet_dir / 'labels.txt'}")
 
 
-def generate_index_json(output_dir=".."):
+def generate_index_json(output_dir="..", version=None):
     """Generate index.json with metadata for all models.
 
     The index.json contains:
@@ -895,27 +895,38 @@ def generate_index_json(output_dir=".."):
     - backend: backend type (xnnpack, coreml, mps, vulkan)
     - inputSize: model input size
     - description: human-readable description
+
+    Args:
+        output_dir: Directory containing model files and where index.json will be written
+        version: Optional version string (e.g., "1.0.1", "1.1.0") for versioned URL paths
     """
     import json
     import hashlib
 
     print("\n" + "="*70)
     print("  Generating index.json")
+    if version:
+        print(f"  Version: {version}")
     print("="*70 + "\n")
 
     output_path = Path(output_dir)
+
+    # Base URL - includes version if provided
+    base_url = "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main"
+    if version:
+        base_url = f"{base_url}/{version}"
 
     # Model categories and their configurations
     model_configs = {
         "mobilenet": {
             "inputSize": 224,
             "labelsFile": "labels.txt",
-            "labelsUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
+            "labelsUrl": f"{base_url}/mobilenet/labels.txt",
         },
         "yolo": {
             "inputSize": 640,
             "labelsFile": "labels.txt",
-            "labelsUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/yolo/labels.txt",
+            "labelsUrl": f"{base_url}/yolo/labels.txt",
         },
         "gemma": {
             "inputSize": None,
@@ -989,7 +1000,7 @@ def generate_index_json(output_dir=".."):
                 "size": file_size,
                 "sizeMB": round(file_size / (1024 * 1024), 2),
                 "inputSize": config["inputSize"],
-                "remoteUrl": f"https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/{category}/{file_name}",
+                "remoteUrl": f"{base_url}/{category}/{file_name}",
             }
 
             # Add labels reference for the model
@@ -1020,14 +1031,14 @@ def generate_index_json(output_dir=".."):
                     "category": category,
                     "hash": sha256_hash.hexdigest(),
                     "size": labels_path.stat().st_size,
-                    "remoteUrl": config["labelsUrl"],
+                    "remoteUrl": f"{base_url}/{category}/{config['labelsFile']}",
                 })
 
     # Create the index structure
     index = {
         "version": "1.0",
         "generated": __import__("datetime").datetime.utcnow().isoformat() + "Z",
-        "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main",
+        "baseUrl": base_url,
         "models": models,
         "labels": labels,
         "backends": backend_info,
