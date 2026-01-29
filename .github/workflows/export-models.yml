@@ -142,13 +142,20 @@ jobs:
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
           python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
+      - name: List exported files before upload
+        if: steps.parse.outputs.skip != 'true'
+        run: |
+          echo "=== Files to upload ==="
+          find ${{ env.EXECUTORCH_VERSION }} -name "*.pte" -type f
+          echo "=== Directory structure ==="
+          ls -la ${{ env.EXECUTORCH_VERSION }}/
+
       - name: Upload Linux artifacts
         if: steps.parse.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: models-linux-${{ env.EXECUTORCH_VERSION }}
-          path: |
-            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
+          path: ${{ env.EXECUTORCH_VERSION }}
           retention-days: 1
 
   # macOS job: exports coreml and mps backends
@@ -235,13 +242,20 @@ jobs:
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
           python main.py export --yolo-face yolov10n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ env.EXECUTORCH_VERSION }}
 
+      - name: List exported files before upload
+        if: steps.parse.outputs.skip != 'true'
+        run: |
+          echo "=== Files to upload ==="
+          find ${{ env.EXECUTORCH_VERSION }} -name "*.pte" -type f
+          echo "=== Directory structure ==="
+          ls -la ${{ env.EXECUTORCH_VERSION }}/
+
       - name: Upload macOS artifacts
         if: steps.parse.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: models-macos-${{ env.EXECUTORCH_VERSION }}
-          path: |
-            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
+          path: ${{ env.EXECUTORCH_VERSION }}
           retention-days: 1
 
   # Commit job: combines artifacts and commits
@@ -256,19 +270,45 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create version directory
+        run: |
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/mobilenet
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-pose
+          mkdir -p ${{ env.EXECUTORCH_VERSION }}/yolo-face
+
       - name: Download Linux artifacts
         if: needs.export-linux.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: models-linux-${{ env.EXECUTORCH_VERSION }}
-          path: .
+          path: artifacts-linux
 
       - name: Download macOS artifacts
         if: needs.export-macos.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: models-macos-${{ env.EXECUTORCH_VERSION }}
-          path: .
+          path: artifacts-macos
+
+      - name: Merge artifacts into version directory
+        run: |
+          echo "=== Merging artifacts ==="
+          # Copy Linux artifacts
+          if [ -d "artifacts-linux" ]; then
+            echo "Linux artifacts:"
+            find artifacts-linux -name "*.pte" -type f
+            cp -r artifacts-linux/* ${{ env.EXECUTORCH_VERSION }}/ 2>/dev/null || true
+          fi
+          # Copy macOS artifacts
+          if [ -d "artifacts-macos" ]; then
+            echo "macOS artifacts:"
+            find artifacts-macos -name "*.pte" -type f
+            cp -r artifacts-macos/* ${{ env.EXECUTORCH_VERSION }}/ 2>/dev/null || true
+          fi
+          # Show merged result
+          echo "=== Merged directory structure ==="
+          find ${{ env.EXECUTORCH_VERSION }} -name "*.pte" -type f
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -366,7 +406,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: exported-models-${{ env.EXECUTORCH_VERSION }}
-          path: |
-            ${{ env.EXECUTORCH_VERSION }}/**/*.pte
-            ${{ env.EXECUTORCH_VERSION }}/index.json
+          path: ${{ env.EXECUTORCH_VERSION }}
           retention-days: 30
