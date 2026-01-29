@@ -100,14 +100,39 @@ jobs:
           # Install executorch first (pulls correct torch version)
           pip install executorch==${{ matrix.version }}
 
-          # Install requirements (torchvision without version constraint - pip resolves compatibility)
-          pip install -r python/requirements.txt
+          # Get torch version installed by executorch
+          TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
+          echo "Torch version from executorch: $TORCH_VERSION"
+
+          # Install compatible torchvision based on torch version
+          # torch 2.9.x -> torchvision 0.24.x
+          # torch 2.10.x -> torchvision 0.25.x
+          # torch 2.6.x -> torchvision 0.21.x
+          # torch 2.5.x -> torchvision 0.20.x
+          # torch 2.4.x -> torchvision 0.19.x
+          if [[ "$TORCH_VERSION" == 2.9.* ]]; then
+            pip install "torchvision>=0.24.0,<0.25.0"
+          elif [[ "$TORCH_VERSION" == 2.10.* ]]; then
+            pip install "torchvision>=0.25.0,<0.26.0"
+          elif [[ "$TORCH_VERSION" == 2.6.* ]]; then
+            pip install "torchvision>=0.21.0,<0.22.0"
+          elif [[ "$TORCH_VERSION" == 2.5.* ]]; then
+            pip install "torchvision>=0.20.0,<0.21.0"
+          elif [[ "$TORCH_VERSION" == 2.4.* ]]; then
+            pip install "torchvision>=0.19.0,<0.20.0"
+          else
+            # Fallback: install without deps to avoid torch upgrade
+            pip install --no-deps torchvision
+          fi
+
+          # Install remaining requirements (excluding torchvision which is already installed)
+          pip install ultralytics>=8.3.0 onnx>=1.20.0 onnx2torch>=1.5.0 numpy pillow
 
           # Verify versions
           echo "=== Installed versions ==="
           python -c "import torch; print(f'torch: {torch.__version__}')"
           python -c "import torchvision; print(f'torchvision: {torchvision.__version__}')"
-          python -c "import executorch; print(f'executorch: {executorch.__version__}')"
+          pip show executorch | grep Version || echo "executorch version check skipped"
 
       - name: Parse inputs
         id: parse
@@ -211,14 +236,39 @@ jobs:
           # Install executorch first (pulls correct torch version)
           pip install executorch==${{ matrix.version }}
 
-          # Install requirements (torchvision without version constraint - pip resolves compatibility)
-          pip install -r python/requirements.txt
+          # Get torch version installed by executorch
+          TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
+          echo "Torch version from executorch: $TORCH_VERSION"
+
+          # Install compatible torchvision based on torch version
+          # torch 2.9.x -> torchvision 0.24.x
+          # torch 2.10.x -> torchvision 0.25.x
+          # torch 2.6.x -> torchvision 0.21.x
+          # torch 2.5.x -> torchvision 0.20.x
+          # torch 2.4.x -> torchvision 0.19.x
+          if [[ "$TORCH_VERSION" == 2.9.* ]]; then
+            pip install "torchvision>=0.24.0,<0.25.0"
+          elif [[ "$TORCH_VERSION" == 2.10.* ]]; then
+            pip install "torchvision>=0.25.0,<0.26.0"
+          elif [[ "$TORCH_VERSION" == 2.6.* ]]; then
+            pip install "torchvision>=0.21.0,<0.22.0"
+          elif [[ "$TORCH_VERSION" == 2.5.* ]]; then
+            pip install "torchvision>=0.20.0,<0.21.0"
+          elif [[ "$TORCH_VERSION" == 2.4.* ]]; then
+            pip install "torchvision>=0.19.0,<0.20.0"
+          else
+            # Fallback: install without deps to avoid torch upgrade
+            pip install --no-deps torchvision
+          fi
+
+          # Install remaining requirements (excluding torchvision which is already installed)
+          pip install ultralytics>=8.3.0 onnx>=1.20.0 onnx2torch>=1.5.0 numpy pillow
 
           # Verify versions
           echo "=== Installed versions ==="
           python -c "import torch; print(f'torch: {torch.__version__}')"
           python -c "import torchvision; print(f'torchvision: {torchvision.__version__}')"
-          python -c "import executorch; print(f'executorch: {executorch.__version__}')"
+          pip show executorch | grep Version || echo "executorch version check skipped"
 
       - name: Parse inputs
         id: parse
@@ -353,13 +403,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: python/requirements.txt
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r python/requirements.txt
 
       - name: Download and copy labels
         run: |
