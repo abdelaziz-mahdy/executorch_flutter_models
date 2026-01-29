@@ -100,24 +100,14 @@ jobs:
           # Install executorch first (pulls correct torch version)
           pip install executorch==${{ matrix.version }}
 
-          # Install matching torchvision based on executorch version
-          # executorch 1.0.1 needs torch 2.4.x -> torchvision 0.19.x
-          # executorch 1.1.0 needs torch 2.5.x/2.6.x -> torchvision 0.20.x/0.21.x
-          TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
-          echo "Detected torch version: $TORCH_VERSION"
-
-          if [[ "$TORCH_VERSION" == 2.4.* ]]; then
-            pip install torchvision==0.19.1
-          elif [[ "$TORCH_VERSION" == 2.5.* ]]; then
-            pip install torchvision==0.20.1
-          elif [[ "$TORCH_VERSION" == 2.6.* ]]; then
-            pip install torchvision==0.21.0
-          else
-            pip install torchvision
-          fi
-
-          # Install other requirements (excluding torchvision which is already installed)
+          # Install requirements (torchvision without version constraint - pip resolves compatibility)
           pip install -r python/requirements.txt
+
+          # Verify versions
+          echo "=== Installed versions ==="
+          python -c "import torch; print(f'torch: {torch.__version__}')"
+          python -c "import torchvision; print(f'torchvision: {torchvision.__version__}')"
+          python -c "import executorch; print(f'executorch: {executorch.__version__}')"
 
       - name: Parse inputs
         id: parse
@@ -151,14 +141,12 @@ jobs:
 
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
@@ -167,7 +155,6 @@ jobs:
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
@@ -175,7 +162,6 @@ jobs:
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
@@ -225,24 +211,14 @@ jobs:
           # Install executorch first (pulls correct torch version)
           pip install executorch==${{ matrix.version }}
 
-          # Install matching torchvision based on executorch version
-          # executorch 1.0.1 needs torch 2.4.x -> torchvision 0.19.x
-          # executorch 1.1.0 needs torch 2.5.x/2.6.x -> torchvision 0.20.x/0.21.x
-          TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
-          echo "Detected torch version: $TORCH_VERSION"
-
-          if [[ "$TORCH_VERSION" == 2.4.* ]]; then
-            pip install torchvision==0.19.1
-          elif [[ "$TORCH_VERSION" == 2.5.* ]]; then
-            pip install torchvision==0.20.1
-          elif [[ "$TORCH_VERSION" == 2.6.* ]]; then
-            pip install torchvision==0.21.0
-          else
-            pip install torchvision
-          fi
-
-          # Install other requirements (excluding torchvision which is already installed)
+          # Install requirements (torchvision without version constraint - pip resolves compatibility)
           pip install -r python/requirements.txt
+
+          # Verify versions
+          echo "=== Installed versions ==="
+          python -c "import torch; print(f'torch: {torch.__version__}')"
+          python -c "import torchvision; print(f'torchvision: {torchvision.__version__}')"
+          python -c "import executorch; print(f'executorch: {executorch.__version__}')"
 
       - name: Parse inputs
         id: parse
@@ -276,14 +252,12 @@ jobs:
 
       - name: Export MobileNet
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'mobilenet' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --mobilenet --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
 
       - name: Export YOLO (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo yolo11n --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
@@ -292,7 +266,6 @@ jobs:
 
       - name: Export YOLO-Pose (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-pose' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-pose yolo11n-pose --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
@@ -300,7 +273,6 @@ jobs:
 
       - name: Export YOLO-Face (all variants)
         if: steps.parse.outputs.skip != 'true' && (steps.parse.outputs.models == 'yolo-face' || steps.parse.outputs.models == 'all')
-        continue-on-error: true
         working-directory: python
         run: |
           python main.py export --yolo-face yolov11n-face --backends ${{ steps.parse.outputs.backends }} --output-dir ../${{ matrix.version }}
