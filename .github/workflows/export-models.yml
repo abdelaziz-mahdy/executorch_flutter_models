@@ -409,11 +409,14 @@ jobs:
           done
 
       - name: Update versions.json
+        env:
+          VERSIONS_JSON: ${{ needs.setup.outputs.versions }}
         run: |
           python -c "
           import json
+          import os
 
-          versions_list = ${{ needs.setup.outputs.versions }}
+          versions_list = json.loads(os.environ['VERSIONS_JSON'])
 
           # Read current versions.json or create new
           try:
