@@ -1149,7 +1149,10 @@ def cmd_export(args):
         export_labels(args.output_dir)
 
     # Always generate index.json after export
-    generate_index_json(args.output_dir)
+    # Extract version from output_dir if it looks like a version (e.g., "../1.1.0" -> "1.1.0")
+    output_dir_name = Path(args.output_dir).name
+    version = output_dir_name if output_dir_name and output_dir_name[0].isdigit() else None
+    generate_index_json(args.output_dir, version=version)
 
     # Summary
     print("\n" + "="*70)
