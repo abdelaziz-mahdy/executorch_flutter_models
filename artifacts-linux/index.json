@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "generated": "2026-01-29T00:12:23.715618Z",
+  "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main",
+  "models": [
+    {
+      "name": "mobilenet_v3_small_vulkan.pte",
+      "modelName": "mobilenet_v3_small",
+      "category": "mobilenet",
+      "backend": "vulkan",
+      "hash": "266763632a3af1528f29ecbdc3c6b003af4cc5d6d41a658efef0d17691b5536b",
+      "size": 10257284,
+      "sizeMB": 9.78,
+      "inputSize": 224,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_vulkan.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
+      "name": "mobilenet_v3_small_xnnpack.pte",
+      "modelName": "mobilenet_v3_small",
+      "category": "mobilenet",
+      "backend": "xnnpack",
+      "hash": "63dfe07200a0c6bc611aa3603ee1823e14dcea477f7afe97096acf60c6de84a9",
+      "size": 10213408,
+      "sizeMB": 9.74,
+      "inputSize": 224,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/mobilenet_v3_small_xnnpack.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/mobilenet/labels.txt",
+      "backendDescription": "CPU-optimized (XNNPACK)"
+    }
+  ],
+  "labels": [],
+  "backends": {
+    "xnnpack": {
+      "description": "CPU-optimized (XNNPACK)"
+    },
+    "coreml": {
+      "description": "Apple Neural Engine (CoreML)"
+    },
+    "mps": {
+      "description": "Apple GPU (Metal Performance Shaders)"
+    },
+    "vulkan": {
+      "description": "GPU-accelerated (Vulkan)"
+    }
+  }
+}
