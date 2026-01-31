@@ -8,6 +8,20 @@ This repository contains pre-exported ExecuTorch models (.pte files) and Python 
 **Parent Project**: [executorch_flutter](https://github.com/abdelaziz-mahdy/executorch_flutter)
 **License**: Models follow their original licenses (Apache 2.0 for MobileNet, AGPL-3.0 for YOLO)
 
+## Quick Start
+
+```bash
+# Export all models (from models/python/)
+cd python && python3 main.py
+
+# Export specific model type
+python3 main.py export --mobilenet
+python3 main.py export --yolo yolo11n
+
+# Validate models
+python3 main.py validate
+```
+
 ## Project Structure
 
 ```
@@ -267,5 +281,4 @@ pip install --upgrade ultralytics
 
 ---
 
-**Last Updated**: 2026-01-17
 **Models Version**: See `index.json` for individual model versions
