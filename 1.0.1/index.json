@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-01-29T23:26:45.558187Z",
+  "generated": "2026-02-04T00:19:49.884038Z",
   "baseUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1",
   "models": [
     {
@@ -8,7 +8,7 @@
       "modelName": "mobilenet_v3_small",
       "category": "mobilenet",
       "backend": "coreml",
-      "hash": "22ca5c742d513c7aa3bc3a2bfc5c1f37ba40d8526c096d545e5bd4cd5ab1fdbb",
+      "hash": "9afe1be3fb0d2b778400cbeb1e8ff311afc3b7f17c1b255110edc9c7adb8ecce",
       "size": 5485634,
       "sizeMB": 5.23,
       "inputSize": 224,
@@ -32,6 +32,20 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "mobilenet_v3_small_vulkan.pte",
+      "modelName": "mobilenet_v3_small",
+      "category": "mobilenet",
+      "backend": "vulkan",
+      "hash": "ec303e88407e03d5e709dd9443e4246cd616d061e3da9881f138bcfe475e41e4",
+      "size": 10226080,
+      "sizeMB": 9.75,
+      "inputSize": 224,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/mobilenet/mobilenet_v3_small_vulkan.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/mobilenet/labels.txt",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "mobilenet_v3_small_xnnpack.pte",
       "modelName": "mobilenet_v3_small",
       "category": "mobilenet",
@@ -50,7 +64,7 @@
       "modelName": "yolo11n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "6ebeb920ad074e8f1e20d4aa1ed5116560aff01baa9b7349b6a9e945b0dce8b5",
+      "hash": "0def453dadaa56a09ef0b362761f480e035d9a1c0c0641d6b14632e1ec2e0d52",
       "size": 5928141,
       "sizeMB": 5.65,
       "inputSize": 640,
@@ -74,6 +88,20 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolo11n_vulkan.pte",
+      "modelName": "yolo11n",
+      "category": "yolo",
+      "backend": "vulkan",
+      "hash": "fee58c91f3ecc2bf4c587752e896977a5aaf560af88eccce72674d4ac7171dbd",
+      "size": 10683200,
+      "sizeMB": 10.19,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/yolo11n_vulkan.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/labels.txt",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolo11n_xnnpack.pte",
       "modelName": "yolo11n",
       "category": "yolo",
@@ -92,7 +120,7 @@
       "modelName": "yolov5n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "dd03bc9fc1aaaa41ae04a49c6471acd36a5420881b6228b7e6c6c3f8ff6e82c9",
+      "hash": "b1ae204d456f40e06b37cdf4331de29296b268d88c95a6c1d420aa6cd6eed635",
       "size": 5865460,
       "sizeMB": 5.59,
       "inputSize": 640,
@@ -116,6 +144,20 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolov5n_vulkan.pte",
+      "modelName": "yolov5n",
+      "category": "yolo",
+      "backend": "vulkan",
+      "hash": "2b5231f4dd65eb54c3753d3302f6360732cd0dd0cea3cc6d57c0dfd7a691896b",
+      "size": 10791360,
+      "sizeMB": 10.29,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/yolov5n_vulkan.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/labels.txt",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolov5n_xnnpack.pte",
       "modelName": "yolov5n",
       "category": "yolo",
@@ -134,7 +176,7 @@
       "modelName": "yolov8n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "64c2f6f3e632078a74ff9aa811c238fc30cbccbfa5aa055d96ddcd480e7e3483",
+      "hash": "a09b0e7e8643393b51f78f815de363fe98192ad7755b8b226b7206f6cbb8b4bd",
       "size": 6832753,
       "sizeMB": 6.52,
       "inputSize": 640,
@@ -158,6 +200,20 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolov8n_vulkan.pte",
+      "modelName": "yolov8n",
+      "category": "yolo",
+      "backend": "vulkan",
+      "hash": "e6a3806868cf07838d8b87cae4db545e3025cc15d7f7b4ca8748de029b0bb928",
+      "size": 12793280,
+      "sizeMB": 12.2,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/yolov8n_vulkan.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo/labels.txt",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolov8n_xnnpack.pte",
       "modelName": "yolov8n",
       "category": "yolo",
@@ -176,7 +232,7 @@
       "modelName": "yolo11n-pose",
       "category": "yolo-pose",
       "backend": "coreml",
-      "hash": "15ddbb0ba5a9b051d675ffce66a80f56947fab9809e2fadcac401dea9aafb383",
+      "hash": "b1615e6a3a5c8132a1c9009b7296ca24098b0f1390eb6fa8e3b688c7125263f9",
       "size": 6566875,
       "sizeMB": 6.26,
       "inputSize": 640,
@@ -196,6 +252,18 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolo11n-pose_vulkan.pte",
+      "modelName": "yolo11n-pose",
+      "category": "yolo-pose",
+      "backend": "vulkan",
+      "hash": "0469da50df8bcd2e4f375a3fd5bc621cbb3c18be5f8cc91957fc7f7f74c73034",
+      "size": 11702464,
+      "sizeMB": 11.16,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo-pose/yolo11n-pose_vulkan.pte",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolo11n-pose_xnnpack.pte",
       "modelName": "yolo11n-pose",
       "category": "yolo-pose",
@@ -212,7 +280,7 @@
       "modelName": "yolov8n-pose",
       "category": "yolo-pose",
       "backend": "coreml",
-      "hash": "f7b65d69ad80f2d32e3d3d477e99f06535b6dcdfb3cfae2f4cc307829da9ec48",
+      "hash": "48932202e64a2df5447829346ad531948d20c18c8259da0da144c8a614484360",
       "size": 7247317,
       "sizeMB": 6.91,
       "inputSize": 640,
@@ -232,6 +300,18 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolov8n-pose_vulkan.pte",
+      "modelName": "yolov8n-pose",
+      "category": "yolo-pose",
+      "backend": "vulkan",
+      "hash": "d50c5665860fccd37c45888f88f1362497a8b7af855f7d33db2a71e37e62ea3c",
+      "size": 13364288,
+      "sizeMB": 12.75,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo-pose/yolov8n-pose_vulkan.pte",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolov8n-pose_xnnpack.pte",
       "modelName": "yolov8n-pose",
       "category": "yolo-pose",
@@ -248,7 +328,7 @@
       "modelName": "yolov10n-face",
       "category": "yolo-face",
       "backend": "coreml",
-      "hash": "bb4c0e55fba8eba8693d313a38c99889a2a6fdae89f09f979cde217cc9a9c42b",
+      "hash": "78d48596cc269ad3c574bbd95fe9135a10176619ad9a057f07acc22cbc0d7c78",
       "size": 5210394,
       "sizeMB": 4.97,
       "inputSize": 640,
@@ -268,6 +348,18 @@
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
+      "name": "yolov10n-face_vulkan.pte",
+      "modelName": "yolov10n-face",
+      "category": "yolo-face",
+      "backend": "vulkan",
+      "hash": "bd168af4b6934278a7ffe609e52a5c8ea283c206801eb63ae93816d33706af49",
+      "size": 9282052,
+      "sizeMB": 8.85,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo-face/yolov10n-face_vulkan.pte",
+      "backendDescription": "GPU-accelerated (Vulkan)"
+    },
+    {
       "name": "yolov10n-face_xnnpack.pte",
       "modelName": "yolov10n-face",
       "category": "yolo-face",
@@ -284,7 +376,7 @@
       "modelName": "yolov11n-face",
       "category": "yolo-face",
       "backend": "coreml",
-      "hash": "7cb11c0e03a6a9368420bb858b3073859dd306a668ba875c98babd0b588b263c",
+      "hash": "f67ef422cf0a6e7b7448ef9344b2b46e383cc02165ce94545b8061b6a1ef801b",
       "size": 5859574,
       "sizeMB": 5.59,
       "inputSize": 640,
@@ -302,6 +394,18 @@
       "inputSize": 640,
       "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo-face/yolov11n-face_mps.pte",
       "backendDescription": "Apple GPU (Metal Performance Shaders)"
+    },
+    {
+      "name": "yolov11n-face_vulkan.pte",
+      "modelName": "yolov11n-face",
+      "category": "yolo-face",
+      "backend": "vulkan",
+      "hash": "817be35d11a136b3e2b3d10946d71e6ce444d34922f6a2d9ce23dce2e236fda1",
+      "size": 10546880,
+      "sizeMB": 10.06,
+      "inputSize": 640,
+      "remoteUrl": "https://raw.githubusercontent.com/abdelaziz-mahdy/executorch_flutter_models/main/1.0.1/yolo-face/yolov11n-face_vulkan.pte",
+      "backendDescription": "GPU-accelerated (Vulkan)"
     },
     {
       "name": "yolov11n-face_xnnpack.pte",
