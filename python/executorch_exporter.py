@@ -75,7 +75,7 @@ class ExecuTorchExporter:
             "requirements": []
         },
         "vulkan": {
-            "platforms": ["android", "linux", "windows"],
+            "platforms": ["android", "ios", "macos", "linux", "windows"],
             "description": "Cross-platform GPU acceleration",
             "requirements": []
         },

@@ -214,11 +214,11 @@ jobs:
           path: ${{ matrix.version }}
           retention-days: 1
 
-  # macOS job: exports xnnpack, coreml, and mps backends
+  # macOS job: exports xnnpack, coreml, mps, and vulkan backends
   export-macos:
     runs-on: macos-latest
     needs: setup
-    if: github.event.inputs.backends == 'all' || github.event.inputs.backends == 'xnnpack' || github.event.inputs.backends == 'coreml' || github.event.inputs.backends == 'mps' || github.event.inputs.backends == ''
+    if: github.event.inputs.backends == 'all' || github.event.inputs.backends == 'xnnpack' || github.event.inputs.backends == 'coreml' || github.event.inputs.backends == 'mps' || github.event.inputs.backends == 'vulkan' || github.event.inputs.backends == ''
     strategy:
       fail-fast: false
       matrix:
@@ -286,12 +286,9 @@ jobs:
             MODELS="all"
           fi
 
-          # macOS backends: xnnpack, coreml, and mps
+          # macOS backends: xnnpack, coreml, mps, and vulkan
           if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
-            BACKENDS="xnnpack coreml mps"
-          elif [ "$BACKENDS" == "vulkan" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
+            BACKENDS="xnnpack coreml mps vulkan"
           fi
 
           echo "models=$MODELS" >> $GITHUB_OUTPUT
