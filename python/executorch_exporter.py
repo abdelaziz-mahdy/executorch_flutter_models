@@ -140,7 +140,16 @@ class ExecuTorchExporter:
                 return [XnnpackPartitioner()]
             elif backend == "vulkan":
                 from executorch.backends.vulkan.partitioner.vulkan_partitioner import VulkanPartitioner
-                return [VulkanPartitioner()]
+                # Use conservative texture limits (2048) for broad compatibility.
+                # Apple Metal limits 3D textures to 2048 per dimension; the
+                # partitioner will fall back to BUFFER storage for tensors that
+                # exceed this, ensuring models work on macOS/iOS via MoltenVK
+                # as well as Android and desktop GPUs.
+                return [VulkanPartitioner(
+                    compile_options={
+                        "texture_limits": (2048, 2048, 2048),
+                    },
+                )]
             elif backend == "qnn":
                 from executorch.backends.qualcomm.partition.qnn_partitioner import QnnPartitioner
                 return [QnnPartitioner()]
