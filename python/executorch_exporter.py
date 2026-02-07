@@ -145,9 +145,14 @@ class ExecuTorchExporter:
                 # partitioner will fall back to BUFFER storage for tensors that
                 # exceed this, ensuring models work on macOS/iOS via MoltenVK
                 # as well as Android and desktop GPUs.
+                #
+                # force_fp16 reduces per-tensor UBO metadata pressure, avoiding
+                # "uniform data allocation exceeded" errors on Android Adreno
+                # GPUs where minUniformBufferOffsetAlignment = 256 bytes.
                 return [VulkanPartitioner(
                     compile_options={
                         "texture_limits": (2048, 2048, 2048),
+                        "force_fp16": True,
                     },
                 )]
             elif backend == "qnn":
