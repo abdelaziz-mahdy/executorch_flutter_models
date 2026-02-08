@@ -140,20 +140,11 @@ class ExecuTorchExporter:
                 return [XnnpackPartitioner()]
             elif backend == "vulkan":
                 from executorch.backends.vulkan.partitioner.vulkan_partitioner import VulkanPartitioner
-                from executorch.backends.vulkan.serialization.vulkan_graph_schema import VkStorageType
-                # Force BUFFER storage to avoid UBO overflow on Android Adreno.
-                #
-                # Texture-backed tensors budget only 2 UBO metadata fields
-                # (sizes + logical_limits), but ops like Linear/MatMul/GroupNorm
-                # unconditionally request 4 fields (+ strides + numel), causing
-                # "uniform data allocation exceeded" at load time.
-                # Buffer storage budgets 4 fields, avoiding the overflow.
-                #
-                # texture_limits kept conservative (2048) for Apple Metal
-                # compatibility via MoltenVK.
+                # Use default texture storage (faster on mobile GPUs).
+                # Buffer storage produces incorrect results on Android Adreno.
+                # texture_limits kept at 2048 for Apple Metal/MoltenVK compat.
                 return [VulkanPartitioner(
                     compile_options={
-                        "storage_type_override": VkStorageType.BUFFER,
                         "texture_limits": (2048, 2048, 2048),
                     },
                 )]
