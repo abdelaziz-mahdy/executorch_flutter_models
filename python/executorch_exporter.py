@@ -140,12 +140,13 @@ class ExecuTorchExporter:
                 return [XnnpackPartitioner()]
             elif backend == "vulkan":
                 from executorch.backends.vulkan.partitioner.vulkan_partitioner import VulkanPartitioner
-                # Use default texture storage (faster on mobile GPUs).
-                # Buffer storage produces incorrect results on Android Adreno.
-                # texture_limits kept at 2048 for Apple Metal/MoltenVK compat.
+                # force_fp16: Android Adreno/Mali GPUs produce incorrect FP32
+                # compute results. FP16 is the standard path for mobile Vulkan.
+                # texture_limits: 2048 for Apple Metal/MoltenVK compat.
                 return [VulkanPartitioner(
                     compile_options={
                         "texture_limits": (2048, 2048, 2048),
+                        "force_fp16": True,
                     },
                 )]
             elif backend == "qnn":
