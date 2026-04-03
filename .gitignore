@@ -1,0 +1,11 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+python/__pycache__/
+
+# CI artifacts (intermediate build outputs)
+artifacts/

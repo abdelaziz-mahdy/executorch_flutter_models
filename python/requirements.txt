@@ -1,0 +1,41 @@
+# ExecuTorch Flutter Plugin - Model Export Dependencies
+#
+# This file contains the Python dependencies required to export
+# PyTorch models to ExecuTorch format for use with the Flutter plugin.
+#
+# Requirements:
+# - Python 3.10, 3.11, or 3.12
+# - Consider using a virtual environment (conda or venv)
+#
+# Install with: pip install -r requirements.txt
+
+# Core packages
+# Note: executorch is installed by CI workflow with specific version
+# torch version is pulled automatically by executorch dependency
+torchvision             # For pretrained models (MobileNet, etc.)
+
+# YOLO models
+ultralytics>=8.3.0      # For YOLO object detection, pose, and face models
+
+# ONNX conversion (required for BlazeFace and MoveNet)
+onnx>=1.20.0            # ONNX model format
+onnx2torch>=1.5.0       # ONNX to PyTorch conversion
+
+# Optional: TensorFlow dependencies (required for MoveNet export)
+# Note: TensorFlow can have compatibility issues on some systems
+# Uncomment if you need to export MoveNet models:
+# tensorflow>=2.15.0
+# tensorflow_hub
+# tf2onnx
+
+# Optional: Apple backend support (macOS/iOS)
+# coremltools>=9.0      # For CoreML backend
+
+# Utilities
+numpy                   # For tensor operations
+pillow                  # For image processing
+
+# Development and testing (optional)
+# pytest
+# black
+# isort
