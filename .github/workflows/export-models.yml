@@ -71,7 +71,7 @@ jobs:
             echo "versions=[\"$INPUT\"]" >> $GITHUB_OUTPUT
           fi
 
-  # macOS exports all backends: xnnpack, coreml, mps, vulkan
+  # macOS exports all backends: xnnpack, coreml, vulkan, and metal (1.3.x+)
   export:
     runs-on: macos-latest
     needs: setup
@@ -141,9 +141,15 @@ jobs:
             MODELS="all"
           fi
 
-          # macOS supports all backends
+          # macOS supports these backends. The deprecated MPS backend has been
+          # dropped; the new Metal backend (AOTI) exists from ExecuTorch 1.3.x
+          # onward, so only request it for those versions.
           if [ -z "$BACKENDS" ] || [ "$BACKENDS" == "all" ]; then
-            BACKENDS="xnnpack coreml mps vulkan"
+            BACKENDS="xnnpack coreml vulkan"
+            case "${{ matrix.version }}" in
+              1.0.*|1.1.*|1.2.*) ;;  # Metal backend not available
+              *) BACKENDS="$BACKENDS metal" ;;
+            esac
           fi
 
           echo "models=$MODELS" >> $GITHUB_OUTPUT
