@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-05-30T00:26:32.954768Z",
+  "generated": "2026-05-31T23:17:13.858976Z",
   "baseUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1",
   "models": [
     {
@@ -8,7 +8,7 @@
       "modelName": "mobilenet_v3_small",
       "category": "mobilenet",
       "backend": "coreml",
-      "hash": "cdf197744b22f9bfc60f5127d267adaff72ac25d890b6633a3e90f486733cfe4",
+      "hash": "7dea6b4fc121f122366e7bef96ba19691a874d860dcc75d61372d9078f9a39c7",
       "size": 5485636,
       "sizeMB": 5.23,
       "inputSize": 224,
@@ -16,20 +16,6 @@
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/mobilenet-labels.txt",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "mobilenet_v3_small_mps.pte",
-      "modelName": "mobilenet_v3_small",
-      "category": "mobilenet",
-      "backend": "mps",
-      "hash": "ccefc531e90f8db793842fb91e7402c6b715ad443050d5e28dbb0d4fb9d2e772",
-      "size": 10319240,
-      "sizeMB": 9.84,
-      "inputSize": 224,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/mobilenet_v3_small_mps.pte",
-      "labelsFile": "labels.txt",
-      "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/mobilenet-labels.txt",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "mobilenet_v3_small_vulkan.pte",
@@ -64,7 +50,7 @@
       "modelName": "yolo11n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "c71763c5840c3a5d488759167bc269e39a6846397a26e9771b71ef17c06dd2b1",
+      "hash": "7486a0a90144503019b0e04dba35e68cc35c6462a1d455aed2bb0eca4f466880",
       "size": 5928136,
       "sizeMB": 5.65,
       "inputSize": 640,
@@ -72,20 +58,6 @@
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolo11n_mps.pte",
-      "modelName": "yolo11n",
-      "category": "yolo",
-      "backend": "mps",
-      "hash": "acd3cf29a10f7e1cd5f009d8828af8e21d623eeb61f22c8355e3efbb61101da3",
-      "size": 10671288,
-      "sizeMB": 10.18,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo11n_mps.pte",
-      "labelsFile": "labels.txt",
-      "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolo11n_vulkan.pte",
@@ -120,7 +92,7 @@
       "modelName": "yolov5n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "b29e5a98f7ba23abe4ec97dbb73d5f7c20837c09c93c1aab5e3878b2cb423f47",
+      "hash": "9127e55cc7cf90a4e893e42a1ee4dbbe47e96702061e752c27cb2a628674bded",
       "size": 5865450,
       "sizeMB": 5.59,
       "inputSize": 640,
@@ -128,20 +100,6 @@
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolov5n_mps.pte",
-      "modelName": "yolov5n",
-      "category": "yolo",
-      "backend": "mps",
-      "hash": "c63defae73a0cdecb08ae896a664062f55f9b14046ad99832ee3e43a3a0b15e0",
-      "size": 10779400,
-      "sizeMB": 10.28,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov5n_mps.pte",
-      "labelsFile": "labels.txt",
-      "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolov5n_vulkan.pte",
@@ -176,7 +134,7 @@
       "modelName": "yolov8n",
       "category": "yolo",
       "backend": "coreml",
-      "hash": "5212767c4641a225cafe643bcf5b2bcb18e1cf3f9062368cd83a3bbcae76b494",
+      "hash": "0ecaba00e2f1dc5073b6dd964f7521135be2d4577e92e3069a25639044824ac1",
       "size": 6832755,
       "sizeMB": 6.52,
       "inputSize": 640,
@@ -184,20 +142,6 @@
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolov8n_mps.pte",
-      "modelName": "yolov8n",
-      "category": "yolo",
-      "backend": "mps",
-      "hash": "1262b62913b8445616d3fe89955abc376bf0c41a63ded03eb983a0564f25118b",
-      "size": 12785480,
-      "sizeMB": 12.19,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov8n_mps.pte",
-      "labelsFile": "labels.txt",
-      "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo-labels.txt",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolov8n_vulkan.pte",
@@ -232,24 +176,12 @@
       "modelName": "yolo11n-pose",
       "category": "yolo-pose",
       "backend": "coreml",
-      "hash": "a5bd750aff356d64d2d8c5ff05c9ccfd992d826679f3d6a1de53b0273bb332af",
+      "hash": "236aa384c0e402700f53875e64e0d5e0d7cb2089e178e8cb6474cdd9d36ac504",
       "size": 6566842,
       "sizeMB": 6.26,
       "inputSize": 640,
       "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo11n-pose_coreml.pte",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolo11n-pose_mps.pte",
-      "modelName": "yolo11n-pose",
-      "category": "yolo-pose",
-      "backend": "mps",
-      "hash": "5bdcfde0df3762951722e82d292d64bc30399c332aa9b5af6f0454eb0d017d39",
-      "size": 11685268,
-      "sizeMB": 11.14,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolo11n-pose_mps.pte",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolo11n-pose_vulkan.pte",
@@ -280,24 +212,12 @@
       "modelName": "yolov8n-pose",
       "category": "yolo-pose",
       "backend": "coreml",
-      "hash": "890d0b5da73eb3a7c21b30bb6cc802f2958b40709bd142245694efdadf757304",
+      "hash": "7319f719e1837ce78e2b1f24eafe9dd9ef35b361f528c6d2a7b53a127c9f0af0",
       "size": 7247305,
       "sizeMB": 6.91,
       "inputSize": 640,
       "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov8n-pose_coreml.pte",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolov8n-pose_mps.pte",
-      "modelName": "yolov8n-pose",
-      "category": "yolo-pose",
-      "backend": "mps",
-      "hash": "b4a0802b21ffb30bc831ad6a2318ab9d4e09b18b1fc040ceeccf636a49652c34",
-      "size": 13350948,
-      "sizeMB": 12.73,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov8n-pose_mps.pte",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolov8n-pose_vulkan.pte",
@@ -328,24 +248,12 @@
       "modelName": "yolov10n-face",
       "category": "yolo-face",
       "backend": "coreml",
-      "hash": "4fe2ea593d18556e3ea99dc078e23ed310ddd3d0b99f89b14989a581dbc14a73",
+      "hash": "7861006b4df3da3f28b940c40aaf308b3d102a05ae715151de3803b0163f8dfb",
       "size": 5210382,
       "sizeMB": 4.97,
       "inputSize": 640,
       "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov10n-face_coreml.pte",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolov10n-face_mps.pte",
-      "modelName": "yolov10n-face",
-      "category": "yolo-face",
-      "backend": "mps",
-      "hash": "8f0590404333eeb8c906cc8bf81997279b71ca5f0b22cc2d6da8c14a1b41a2d4",
-      "size": 9265864,
-      "sizeMB": 8.84,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov10n-face_mps.pte",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolov10n-face_vulkan.pte",
@@ -376,24 +284,12 @@
       "modelName": "yolov11n-face",
       "category": "yolo-face",
       "backend": "coreml",
-      "hash": "765ccc26bbbc1dd7e23628448eec7d2be10a38870806a8aadb630f41c5a68ff0",
+      "hash": "6df723800ebfca1c855cff0be209d4d8e17dfd630a96b99cc8c9ec6b180e9ef9",
       "size": 5859569,
       "sizeMB": 5.59,
       "inputSize": 640,
       "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov11n-face_coreml.pte",
       "backendDescription": "Apple Neural Engine (CoreML)"
-    },
-    {
-      "name": "yolov11n-face_mps.pte",
-      "modelName": "yolov11n-face",
-      "category": "yolo-face",
-      "backend": "mps",
-      "hash": "37b8cf57a51188c0c5491357bd49301bd0dffecc729c86cac4f91f778763948e",
-      "size": 10535848,
-      "sizeMB": 10.05,
-      "inputSize": 640,
-      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.3.1/yolov11n-face_mps.pte",
-      "backendDescription": "Apple GPU (Metal Performance Shaders)"
     },
     {
       "name": "yolov11n-face_vulkan.pte",
