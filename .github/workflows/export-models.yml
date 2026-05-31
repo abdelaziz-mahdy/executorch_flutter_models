@@ -125,6 +125,26 @@ jobs:
           # Install remaining requirements (excluding torchvision which is already installed)
           pip install ultralytics>=8.3.0 onnx>=1.20.0 onnx2torch>=1.5.0 numpy pillow
 
+          # Metal backend (1.3.x+) is AOTI-based and needs torchao rebuilt from
+          # source with the experimental MPS ops - the PyPI wheel doesn't ship
+          # libtorchao_ops_mps_aten.dylib. Skipped for versions without Metal.
+          case "${{ matrix.version }}" in
+            1.0.*|1.1.*|1.2.*)
+              echo "Skipping torchao MPS build (no Metal backend for ${{ matrix.version }})"
+              ;;
+            *)
+              echo "=== Building torchao with experimental MPS ops (for Metal export) ==="
+              pip install pyyaml setuptools wheel cmake ninja
+              TORCHAO_VER=$(python -c "import torchao; print(torchao.__version__.split('+')[0])")
+              echo "Rebuilding torchao $TORCHAO_VER from git with TORCHAO_BUILD_EXPERIMENTAL_MPS=1"
+              TORCHAO_BUILD_EXPERIMENTAL_MPS=1 CMAKE_BUILD_PARALLEL_LEVEL=4 \
+                pip install -v --no-build-isolation --no-deps --force-reinstall \
+                "git+https://github.com/pytorch/ao@v${TORCHAO_VER}"
+              # AOTI links libomp at export time; point the linker at torch's bundled copy
+              echo "LIBRARY_PATH=$(python -c 'import os,torch;print(os.path.join(os.path.dirname(torch.__file__),"lib"))')" >> "$GITHUB_ENV"
+              ;;
+          esac
+
           # Verify versions
           echo "=== Installed versions ==="
           python -c "import torch; print(f'torch: {torch.__version__}')"
