@@ -71,7 +71,12 @@ class ExecuTorchExporter:
         },
         "mps": {
             "platforms": ["ios", "macos"],
-            "description": "Metal Performance Shaders (GPU)",
+            "description": "Metal Performance Shaders (GPU) - deprecated, use metal",
+            "requirements": []
+        },
+        "metal": {
+            "platforms": ["macos"],
+            "description": "Apple Metal GPU (AOTI) - macOS desktop only",
             "requirements": []
         },
         "vulkan": {
@@ -124,6 +129,16 @@ class ExecuTorchExporter:
             except (ImportError, AttributeError):
                 available[backend] = False
 
+        # Metal is an AOTI backend that requires the MetalPartitioner AND an
+        # available MPS device to export (so it only works on macOS).
+        try:
+            from executorch.backends.apple.metal.metal_partitioner import (  # noqa: F401
+                MetalPartitioner,
+            )
+            available["metal"] = bool(torch.backends.mps.is_available())
+        except (ImportError, AttributeError):
+            available["metal"] = False
+
         return available
 
     def _get_backend_partitioner(self, backend: str):
@@ -138,6 +153,12 @@ class ExecuTorchExporter:
             elif backend == "xnnpack":
                 from executorch.backends.xnnpack.partition.xnnpack_partitioner import XnnpackPartitioner
                 return [XnnpackPartitioner()]
+            elif backend == "metal":
+                from executorch.backends.apple.metal.metal_partitioner import MetalPartitioner
+                from executorch.backends.apple.metal.metal_backend import MetalBackend
+                return [MetalPartitioner(
+                    [MetalBackend.generate_method_name_compile_spec("forward")]
+                )]
             elif backend == "vulkan":
                 from executorch.backends.vulkan.partitioner.vulkan_partitioner import VulkanPartitioner
                 # force_fp16: Android Adreno/Mali GPUs produce incorrect FP32
