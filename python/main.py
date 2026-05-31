@@ -1304,8 +1304,8 @@ Note: Gemma models require additional setup (advanced):
                                 help='Export YOLO Face model(s) (e.g., yolov8n-face, yolov8s-face)')
     export_parser.add_argument('--labels', action='store_true', help='Generate label files')
     export_parser.add_argument('--backends', nargs='+',
-                                choices=['xnnpack', 'coreml', 'mps', 'vulkan', 'qnn', 'arm'],
-                                help='Backend(s) to export for (default: xnnpack, coreml, mps, vulkan)')
+                                choices=['xnnpack', 'coreml', 'mps', 'metal', 'vulkan', 'qnn', 'arm'],
+                                help='Backend(s) to export for (default: xnnpack, coreml, metal, vulkan)')
     export_parser.add_argument('--output-dir', default='..',
                                 help='Output directory (default: .. - parent models/ directory)')
 
