@@ -18,3 +18,6 @@ artifacts/
 # Local export scratch + large tokenizer assets (also hosted on Releases)
 **/_export_tmp/
 gemma4/*tokenizer*.json
+
+# MLX Metal kernel library — build artifact, ship via release
+*.metallib
