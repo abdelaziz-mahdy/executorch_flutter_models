@@ -9,3 +9,15 @@ python/__pycache__/
 
 # CI artifacts (intermediate build outputs)
 artifacts/
+
+# Model weight artifacts — hosted on GitHub Releases, never committed to git
+*.pte
+*.ptd
+*.safetensors
+
+# Local export scratch + large tokenizer assets (also hosted on Releases)
+**/_export_tmp/
+gemma4/*tokenizer*.json
+
+# MLX Metal kernel library — build artifact, ship via release
+*.metallib

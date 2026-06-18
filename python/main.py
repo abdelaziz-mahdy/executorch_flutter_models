@@ -847,6 +847,96 @@ def export_gemma(model_name="gemma-3-270m", output_dir=".."):
         return False
 
 
+def export_gemma4(model_name="gemma-4-E2B-it", output_dir="..", backend="xnnpack"):
+    """Export a Gemma 4 text-generation model to ExecuTorch via Optimum.
+
+    Gemma 4 (Apache 2.0) is the on-device target. Unlike the legacy export_gemma(),
+    this emits the REAL tokenizer.json (required by the ExecuTorch LLM runner) instead
+    of a get_vocab() dump, and re-enables the custom SDPA + KV-cache ops (supported on
+    ExecuTorch 1.3.1; the old code disabled them citing a stale v0.7.0 limitation).
+
+    Target: Gemma 4 E2B only — no fallback to other models. If a released
+    optimum-executorch does not support Gemma 4 yet, install a newer commit/main
+    and pin it (see install_executorch.sh); do not substitute a different model.
+
+    Requires HF access to google/<model_name> and `hf auth login`.
+    """
+    print("\n" + "=" * 70)
+    print(f"  Exporting {model_name.upper()} ({backend})")
+    print("=" * 70 + "\n")
+
+    try:
+        import subprocess
+        import shutil
+        from pathlib import Path
+
+        model_id = f"google/{model_name}"
+        temp_output = Path(output_dir).resolve() / f"{model_name}_{backend}_temp"
+        temp_output.mkdir(parents=True, exist_ok=True)
+
+        cmd = [
+            "optimum-cli", "export", "executorch",
+            "--model", model_id,
+            "--task", "text-generation",
+            "--recipe", backend,
+            "--use_custom_sdpa",
+            "--use_custom_kv_cache",
+            "--qlinear", "8da4w",
+            "--qembedding", "8w",
+            "--output_dir", str(temp_output),
+        ]
+        print(f"🔄 Running: {' '.join(cmd)}")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"❌ Export failed (exit {result.returncode})")
+            print(f"   stderr: {result.stderr[-2000:]}")
+            return False
+
+        pte_files = list(temp_output.glob("*.pte"))
+        if not pte_files:
+            print(f"❌ No .pte produced in {temp_output}")
+            return False
+
+        out_dir = Path(output_dir).resolve() / "gemma4"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        final_pte = out_dir / f"{model_name}_{backend}.pte"
+        shutil.move(str(pte_files[0]), str(final_pte))
+        print(f"✅ Model: {final_pte.name} "
+              f"({final_pte.stat().st_size / (1024 * 1024):.1f} MB)")
+
+        # Some recipes split weights into a .ptd blob alongside the .pte.
+        for ptd in temp_output.glob("*.ptd"):
+            shutil.move(str(ptd), str(out_dir / f"{model_name}_{backend}.ptd"))
+            print(f"✅ Data blob: {model_name}_{backend}.ptd")
+
+        # The REAL tokenizer the runner needs. optimum writes tokenizer files into
+        # the output dir; fall back to downloading tokenizer.json from the HF repo.
+        tokenizer_dst = out_dir / f"{model_name}_tokenizer.json"
+        tokenizer_src = temp_output / "tokenizer.json"
+        if tokenizer_src.exists():
+            shutil.copy(str(tokenizer_src), str(tokenizer_dst))
+        else:
+            from huggingface_hub import hf_hub_download
+            downloaded = hf_hub_download(repo_id=model_id, filename="tokenizer.json")
+            shutil.copy(downloaded, str(tokenizer_dst))
+        print(f"✅ Tokenizer: {tokenizer_dst.name}")
+
+        shutil.rmtree(temp_output, ignore_errors=True)
+        return True
+
+    except ImportError as e:
+        print(f"❌ Import error: {e}")
+        print("\n💡 Install optimum-executorch (Gemma-4-capable) from source:")
+        print("   ./install_executorch.sh")
+        return False
+    except Exception as e:
+        print(f"❌ Export failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def export_labels(output_dir=".."):
     """Export COCO and ImageNet labels to model directories."""
     print("\n" + "="*70)
@@ -933,6 +1023,11 @@ def generate_index_json(output_dir="..", version=None):
             "labelsUrl": f"{release_base_url}/yolo-labels.txt",
         },
         "gemma": {
+            "inputSize": None,
+            "labelsFile": None,
+            "labelsUrl": None,
+        },
+        "gemma4": {
             "inputSize": None,
             "labelsFile": None,
             "labelsUrl": None,
@@ -1088,6 +1183,7 @@ def cmd_export(args):
     # Note: Gemma, MoveNet, BlazeFace are NOT included in --all because they require
     # additional dependencies. Users must explicitly use their respective flags.
     export_gemma_flag = args.gemma
+    export_gemma4_flag = getattr(args, 'gemma4', False)
     export_movenet_variant = getattr(args, 'movenet', None)
     export_blazeface_flag = getattr(args, 'blazeface', False)
 
@@ -1146,6 +1242,12 @@ def cmd_export(args):
     if export_gemma_flag:
         total_count += 1
         if export_gemma("gemma-3-270m", args.output_dir):
+            success_count += 1
+
+    # Export Gemma 4 (on-device LLM target; text-first)
+    if export_gemma4_flag:
+        total_count += 1
+        if export_gemma4("gemma-4-E2B-it", args.output_dir):
             success_count += 1
 
     # Export labels
@@ -1295,6 +1397,7 @@ Note: Gemma models require additional setup (advanced):
     export_parser.add_argument('--mobilenet', action='store_true', help='Export MobileNet')
     export_parser.add_argument('--yolo', nargs='+', metavar='MODEL', help='Export YOLO model(s)')
     export_parser.add_argument('--gemma', action='store_true', help='Export Gemma text generation model')
+    export_parser.add_argument('--gemma4', action='store_true', help='Export Gemma 4 E2B (on-device LLM, Apache 2.0)')
     export_parser.add_argument('--movenet', nargs='?', const='lightning', metavar='VARIANT',
                                 help='Export MoveNet pose estimation (lightning or thunder, default: lightning)')
     export_parser.add_argument('--blazeface', action='store_true', help='Export BlazeFace face detection')
@@ -1327,6 +1430,7 @@ Note: Gemma models require additional setup (advanced):
         args.mobilenet = False
         args.yolo = None
         args.gemma = False
+        args.gemma4 = False
         args.movenet = None
         args.blazeface = False
         args.yolo_pose = None
