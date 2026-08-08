@@ -19,6 +19,7 @@ on:
           - '1.1.0'
           - '1.2.0'
           - '1.3.1'
+          - '1.4.0'
       models:
         description: 'Models to export'
         required: true
@@ -62,10 +63,10 @@ jobs:
           INPUT="${{ github.event.inputs.executorch_versions }}"
           if [ -z "$INPUT" ]; then
             # Automatic trigger (push to python/): only build latest version
-            echo 'versions=["1.3.1"]' >> $GITHUB_OUTPUT
+            echo 'versions=["1.4.0"]' >> $GITHUB_OUTPUT
           elif [ "$INPUT" == "all" ]; then
             # Manual trigger with "all": rebuild all versions
-            echo 'versions=["1.0.1", "1.1.0", "1.2.0", "1.3.1"]' >> $GITHUB_OUTPUT
+            echo 'versions=["1.0.1", "1.1.0", "1.2.0", "1.3.1", "1.4.0"]' >> $GITHUB_OUTPUT
           else
             # Manual trigger with specific version
             echo "versions=[\"$INPUT\"]" >> $GITHUB_OUTPUT
