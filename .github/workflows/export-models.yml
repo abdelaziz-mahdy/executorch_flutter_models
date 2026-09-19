@@ -97,10 +97,24 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
-          # Install executorch first (pulls correct torch version)
+          # Install executorch first (pulls correct torch version up to 1.4.x)
           pip install executorch==${{ matrix.version }}
 
-          # Get torch version installed by executorch
+          # The executorch wheel stopped depending on torch in 1.5.0, so nothing
+          # pulls it in anymore. Install the version ExecuTorch pins upstream
+          # (torch_pin.py at the matching tag). Fail loudly for an unmapped
+          # version rather than exporting against whatever torch is latest.
+          if ! python -c "import torch" 2>/dev/null; then
+            case "${{ matrix.version }}" in
+              1.5.*) pip install "torch==2.14.*" ;;
+              *)
+                echo "::error::executorch ${{ matrix.version }} did not install torch and no torch pin is mapped for it"
+                exit 1
+                ;;
+            esac
+          fi
+
+          # Get the installed torch version
           TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
           echo "Torch version from executorch: $TORCH_VERSION"
 

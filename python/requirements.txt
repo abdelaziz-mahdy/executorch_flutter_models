@@ -11,7 +11,8 @@
 
 # Core packages
 # Note: executorch is installed by CI workflow with specific version
-# torch version is pulled automatically by executorch dependency
+# torch is pulled in by the executorch dependency up to 1.4.x; from 1.5.0 the
+# wheel no longer depends on it and the CI workflow installs the pinned version
 torchvision             # For pretrained models (MobileNet, etc.)
 
 # YOLO models
