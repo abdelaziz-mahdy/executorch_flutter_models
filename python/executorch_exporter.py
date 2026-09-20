@@ -8,6 +8,7 @@
 # to ExecuTorch format with automatic backend optimization selection.
 
 import argparse
+import contextlib
 import json
 import os
 import warnings
@@ -284,11 +285,22 @@ class ExecuTorchExporter:
                     elif backend == "xnnpack":
                         compile_config = EdgeCompileConfig(_skip_dim_order=True)
 
-                    et_program = to_edge_transform_and_lower(
-                        export(optimized_model, sample_inputs),
-                        partitioner=partitioner,
-                        compile_config=compile_config,
-                    ).to_executorch()
+                    # Metal embeds an AOTInductor-compiled shared object. Left
+                    # to inductor's defaults it links a libomp path that only
+                    # exists on the export machine (fails to load elsewhere) and
+                    # uses channels-last convs the Metal kernel misreads (wrong
+                    # outputs). See portable_aoti.py.
+                    lowering_context = contextlib.nullcontext()
+                    if backend == "metal":
+                        from portable_aoti import portable_aoti_shared_object
+                        lowering_context = portable_aoti_shared_object()
+
+                    with lowering_context:
+                        et_program = to_edge_transform_and_lower(
+                            export(optimized_model, sample_inputs),
+                            partitioner=partitioner,
+                            compile_config=compile_config,
+                        ).to_executorch()
 
                 # Generate filename
                 suffix = "_quantized" if config.quantize else ""
