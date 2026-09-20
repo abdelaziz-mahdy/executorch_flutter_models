@@ -24,6 +24,26 @@ import torch
 import torchvision.models as models
 
 
+# Model families whose Metal export has been checked against PyTorch on the
+# Metal runtime. A Metal model that loads but computes the wrong thing is worse
+# than no Metal model, so nothing else is published for that backend.
+#
+# YOLO (and anything else that feeds a chunk/unbind view into a convolution or
+# a matmul) is excluded because ExecuTorch's Metal ops ignore a tensor's storage
+# offset: yolo11n / yolov8n / yolov5n ran without error but were off by hundreds
+# on box coordinates compared with their XNNPACK exports. Add a family here only
+# after comparing its Metal output with eager PyTorch.
+METAL_VERIFIED_FAMILIES = {"mobilenet"}
+
+
+def publishable_backends(family, backends):
+    """Drop Metal for model families whose Metal output has not been verified."""
+    if "metal" in backends and family not in METAL_VERIFIED_FAMILIES:
+        print(f"⏭️  Skipping metal for {family}: Metal output not verified for this model family")
+        return [b for b in backends if b != "metal"]
+    return backends
+
+
 def export_mobilenet(output_dir="..", backends=None):
     """Export MobileNet V3 Small with multiple backend support."""
     print("\n" + "="*70)
@@ -48,6 +68,7 @@ def export_mobilenet(output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("mobilenet", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
@@ -130,6 +151,7 @@ def export_yolo(model_name="yolo11n", output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("yolo", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
@@ -265,6 +287,7 @@ def export_movenet(model_variant="lightning", output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("movenet", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
@@ -454,6 +477,7 @@ def export_blazeface(output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("blazeface", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
@@ -546,6 +570,7 @@ def export_yolo_pose(model_name="yolo11n-pose", output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("yolo_pose", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
@@ -668,6 +693,7 @@ def export_yolo_face(model_name="yolov8n-face", output_dir="..", backends=None):
 
         # Filter backends to only available ones
         available_backends = [b for b in backends if exporter.available_backends.get(b, False)]
+        available_backends = publishable_backends("yolo_face", available_backends)
 
         if not available_backends:
             print(f"⚠️  No available backends from requested: {backends}")
