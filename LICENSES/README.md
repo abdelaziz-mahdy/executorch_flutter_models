@@ -9,13 +9,14 @@ This directory contains license information for all pre-trained models included 
 | **MobileNet** | MobileNet V3 Small | Apache 2.0 | ✅ Allowed |
 | **BlazeFace** | BlazeFace 128x128 | Apache 2.0 | ✅ Allowed |
 | **MoveNet** | Lightning, Thunder | Apache 2.0 | ✅ Allowed |
+| **Qwen3** (LLM) | Qwen3 0.6B | Apache 2.0 | ✅ Allowed |
 | **YOLO** | YOLO11, YOLOv8, YOLOv5 | AGPL-3.0 | ⚠️ Requires license |
 | **YOLO-Pose** | YOLO11-Pose, YOLOv8-Pose | AGPL-3.0 | ⚠️ Requires license |
 | **YOLO-Face** | YOLOv11-Face, etc. | GPL-3.0 | ⚠️ Requires license |
 
 ## License Details
 
-### Apache 2.0 (MobileNet, BlazeFace, MoveNet)
+### Apache 2.0 (MobileNet, BlazeFace, MoveNet, Qwen3)
 
 These models are licensed under Apache 2.0, which allows:
 - Commercial use
