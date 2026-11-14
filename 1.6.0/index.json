@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-11-14T02:18:42.673418Z",
+  "generated": "2026-11-14T02:20:39.804118Z",
   "baseUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.6.0",
   "models": [
     {
@@ -16,6 +16,19 @@
       "labelsFile": "labels.txt",
       "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.6.0/mobilenet-labels.txt",
       "backendDescription": "Apple Neural Engine (CoreML)"
+    },
+    {
+      "name": "mobilenet_v3_small_metal.pte",
+      "modelName": "mobilenet_v3_small",
+      "category": "mobilenet",
+      "backend": "metal",
+      "hash": "5f3aa465db4b0ff2bac7bd0b3333f7c2b9a5d0eba0e4a042fad38595e43909a2",
+      "size": 16268608,
+      "sizeMB": 15.51,
+      "inputSize": 224,
+      "remoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.6.0/mobilenet_v3_small_metal.pte",
+      "labelsFile": "labels.txt",
+      "labelsRemoteUrl": "https://github.com/abdelaziz-mahdy/executorch_flutter_models/releases/download/v1.6.0/mobilenet-labels.txt"
     },
     {
       "name": "mobilenet_v3_small_vulkan.pte",
