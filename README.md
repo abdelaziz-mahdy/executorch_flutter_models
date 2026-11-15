@@ -84,6 +84,21 @@ final xnnpackModels = models.where((m) => m['backend'] == 'xnnpack').toList();
 | `yolov11n-face_*.pte` | xnnpack, coreml, mps, vulkan | YOLO11 Face |
 | `yolov10n-face_*.pte` | xnnpack, coreml, mps, vulkan | YOLOv10 Face |
 
+### Language Models (hosted LLMs)
+
+Ready-made LLM exports for the plugin's `ExecuTorchLLM` (streaming chat). They
+are exported by hand with `python/export_llm.py` (not by CI), uploaded to the
+version's release, and listed in `<version>/llms.json` with sizes, SHA-256
+hashes and each model's chat format. `python/make_llms_json.py` writes that
+file from the exported files.
+
+| Model | Backend | File |
+|-------|---------|------|
+| Qwen3 0.6B (Apache 2.0) | XNNPACK (CPU) | `qwen3_0.6b_xnnpack.pte` |
+| Qwen3 0.6B (Apache 2.0) | MLX (Apple GPU) | `qwen3_0.6b_mlx.pte` + `mlx.metallib` |
+
+Both use `qwen3_0.6b_tokenizer.json`; the license text ships as `Qwen3-LICENSE`.
+
 ## Backend Selection
 
 | Backend | Best For | Platforms |
